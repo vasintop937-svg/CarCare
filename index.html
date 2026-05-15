@@ -1,13 +1,577 @@
 <!DOCTYPE html>
 
-<html>
-<head><meta charset="UTF-8"/><title>Test</title>
-<style>body{background:#0D0F14;color:#C8FF00;font-family:sans-serif;padding:40px;font-size:24px}</style>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0D0F14"/>
+<title>CarDiary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F14;--s:#161920;--s2:#1E2230;--b:rgba(255,255,255,.07);
+  --a:#C8FF00;--t:#F0F2F8;--m:#7A8099;--r:16px;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif
+}
+body{background:var(--bg);color:var(--t);font-family:var(--fb);min-height:100vh}
+#app{max-width:480px;margin:0 auto;min-height:100vh}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg) 80%,transparent)}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px}
+.logo span{color:var(--a)}
+.ico-btn{width:42px;height:42px;border-radius:12px;background:var(--s);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t);flex-shrink:0}
+.card{background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:20px;transition:all .2s}
+.card-h:hover{border-color:rgba(200,255,0,.2);transform:translateY(-1px);cursor:pointer}
+.wrap{padding:0 16px 140px}
+.sec{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--m);text-transform:uppercase;padding:0 4px;margin:20px 0 10px}
+/* FAB row */
+.fab-row{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:40}
+.fab{background:var(--a);color:#0D0F14;border:none;border-radius:14px;padding:13px 20px;font-family:var(--fd);font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;cursor:pointer;box-shadow:0 8px 28px rgba(200,255,0,.25);white-space:nowrap}
+.fab-ghost{background:var(--s2);color:var(--t);border:1px solid var(--b);box-shadow:none}
+.fab-plan{color:#F59E0B;border-color:rgba(245,158,11,.3)}
+/* empty */
+.empty{text-align:center;padding:60px 32px}
+.empty-ico{width:80px;height:80px;border-radius:24px;background:var(--s2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px}
+.empty h3{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:8px}
+.empty p{color:var(--m);font-size:14px;line-height:1.5}
+/* hero */
+.hero{background:linear-gradient(135deg,var(--s),var(--s2));border:1px solid var(--b);border-radius:20px;padding:24px;margin-bottom:16px}
+.hero-top{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
+.hero-ava{width:64px;height:64px;border-radius:18px;background:#3B82F633;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.hero-title{font-family:var(--fd);font-size:22px;font-weight:800;line-height:1.2}
+.hero-sub{color:var(--m);font-size:14px;margin-top:4px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat{background:rgba(255,255,255,.04);border-radius:12px;padding:12px;border:1px solid var(--b)}
+.stat-v{font-family:var(--fd);font-size:17px;font-weight:700}
+.stat-k{font-size:11px;color:var(--m);margin-top:2px}
+/* records */
+.rec{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--b);cursor:pointer}
+.rec:last-child{border-bottom:none}
+.rec:hover{opacity:.8}
+.rec-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.rec-body{flex:1;min-width:0}
+.rec-title{font-weight:500;font-size:15px}
+.rec-meta{font-size:12px;color:var(--m);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.rec-cost{font-family:var(--fd);font-weight:700;font-size:15px;color:var(--a);flex-shrink:0}
+.pill{display:inline-flex;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500}
+.rcard{padding:4px 20px 20px}
+.total{display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:1px solid var(--b);margin-top:6px}
+/* modals */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:100;animation:fi .2s}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:480px;margin:0 auto;background:var(--s);border-radius:24px 24px 0 0;padding:24px 20px 44px;max-height:90vh;overflow-y:auto;animation:su .25s}
+@keyframes su{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.m-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.m-title{font-family:var(--fd);font-size:20px;font-weight:700}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--m);font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:11px 14px;color:var(--t);font-family:var(--fb);font-size:15px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(200,255,0,.4)}
+.field textarea{resize:vertical;min-height:70px}
+.field select option{background:var(--s2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-ok{width:100%;padding:14px;border:none;border-radius:14px;background:var(--a);color:#0D0F14;font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;margin-top:6px}
+.btn-ok:disabled{opacity:.4}
+.btn-del{background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px;font-size:14px;cursor:pointer;width:100%;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+/* cats */
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat{padding:11px;border-radius:12px;border:1px solid var(--b);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px}
+.cat.on{border-color:var(--a);background:rgba(200,255,0,.07)}
+.cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* emojis */
+.emojis{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.emj{width:44px;height:44px;border-radius:12px;background:var(--s2);border:1px solid var(--b);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.emj.on{border-color:var(--a);background:rgba(200,255,0,.1)}
+/* query */
+.qbox{background:var(--s2);border:1px solid rgba(200,255,0,.2);border-radius:14px;padding:16px;margin-top:14px}
+.qlbl{font-size:11px;color:var(--a);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.qtxt{font-family:var(--fd);font-size:16px;font-weight:600;line-height:1.4;margin-bottom:12px}
+.qlinks{display:flex;gap:8px;flex-wrap:wrap}
+.qlink{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:7px 12px;font-size:13px;text-decoration:none;color:var(--t);display:inline-flex;align-items:center;gap:5px}
+.qlink:hover{border-color:rgba(200,255,0,.3);color:var(--a)}
+.copybtn{background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.2);color:var(--a);border-radius:10px;padding:7px 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+/* reminders */
+.rem{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--b)}
+.rem:last-child{border-bottom:none}
+.rem-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rem-body{flex:1;min-width:0}
+.rem-ttl{font-size:14px;font-weight:500}
+.rem-meta{font-size:12px;color:var(--m);margin-top:2px}
+.pbar{height:4px;border-radius:2px;background:var(--s2);margin-top:6px;overflow:hidden}
+.pfill{height:100%;border-radius:2px}
+.rbadge{border-radius:8px;padding:4px 8px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.tmpls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.tmpl{padding:12px;border-radius:12px;border:1px solid var(--b);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px}
+.tmpl:hover{border-color:rgba(200,255,0,.3)}
+.pbtn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--b);background:var(--s2);color:var(--m)}
+.pbtn.on{border-color:var(--a);background:rgba(200,255,0,.1);color:var(--a)}
+/* alerts */
+.alert{border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;border:1px solid}
+.alert.cr{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2)}
+.alert.wn{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2)}
+/* weather */
+.wcrd{border-radius:18px;padding:18px;border:1px solid var(--b);background:var(--s);margin-bottom:4px}
+.wtemp{font-family:var(--fd);font-size:38px;font-weight:800;line-height:1}
+.wdesc{font-size:13px;color:var(--m);margin-top:3px}
+.wcity{font-size:12px;color:var(--m);margin-top:6px}
+.frow{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
+.fday{flex-shrink:0;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px;text-align:center;min-width:52px}
+.fdname{font-size:10px;color:var(--m);margin-bottom:3px}
+.fdmax{font-family:var(--fd);font-size:14px;font-weight:700}
+.fdmin{font-size:10px;color:var(--m)}
+.tadvice{border-radius:12px;padding:12px 14px;font-size:13px;font-weight:500;display:flex;align-items:flex-start;gap:10px;line-height:1.5;margin-top:4px}
+.tadvice.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10B981}
+.tadvice.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#F59E0B}
+.tadvice.critical,.tadvice.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#EF4444}
+/* plan */
+.plan{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--b)}
+.plan:last-child{border-bottom:none}
+.pbar2{width:6px;border-radius:3px;flex-shrink:0;align-self:stretch;min-height:44px}
+.plan-body{flex:1;min-width:0}
+.plan-ttl{font-weight:500;font-size:15px;margin-bottom:3px;cursor:pointer}
+.plan-meta{font-size:12px;color:var(--m);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.plan-acts{display:flex;gap:8px;flex-wrap:wrap}
+.done-btn{padding:6px 14px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:rgba(200,255,0,.12);color:var(--a);display:flex;align-items:center;gap:5px}
+.srch-btn{padding:6px 12px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid var(--b);background:var(--s2);color:var(--m);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.pri-sel{display:flex;gap:8px;margin-bottom:4px}
+.pri-btn{flex:1;padding:10px 6px;border-radius:12px;border:1px solid var(--b);cursor:pointer;text-align:center;font-size:12px;font-weight:600;background:var(--s2);color:var(--m)}
+.pri-btn.h{border-color:#EF4444;background:rgba(239,68,68,.1);color:#EF4444}
+.pri-btn.m{border-color:#F59E0B;background:rgba(245,158,11,.1);color:#F59E0B}
+.pri-btn.l{border-color:#10B981;background:rgba(16,185,129,.1);color:#10B981}
+/* toast */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:11px 18px;font-size:14px;z-index:200;animation:fi .2s;box-shadow:0 8px 28px rgba(0,0,0,.4);white-space:nowrap;pointer-events:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--b);border-radius:4px}
+</style>
 </head>
 <body>
-<div id="out">Загрузка...</div>
+<div id="app"></div>
 <script>
-document.getElementById('out').textContent = 'CarDiary работает! ✓ ' + new Date().toLocaleTimeString();
+// ── Storage ──────────────────────────────────────────────────────────────────
+const SK = 'cardiary_v5';
+function load() {
+  try { const r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[]}; }
+  catch { return {cars:[],records:[],reminders:[],planned:[]}; }
+}
+function save(d) { try { localStorage.setItem(SK, JSON.stringify(d)); } catch{} }
+let D = load();
+const uid = () => Math.random().toString(36).slice(2,10);
+
+// ── State ────────────────────────────────────────────────────────────────────
+let view = ‘home’, selCarId = null, selRecId = null;
+let toastTimer = null;
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const CATS = [
+{id:‘maintenance’,label:‘ТО / Обслуживание’,color:’#3B82F6’},
+{id:‘repair’,label:‘Ремонт’,color:’#EF4444’},
+{id:‘tires’,label:‘Шины / Диски’,color:’#10B981’},
+{id:‘fuel’,label:‘Топливо’,color:’#F59E0B’},
+{id:‘insurance’,label:‘Страховка / Доки’,color:’#8B5CF6’},
+{id:‘other’,label:‘Прочее’,color:’#6B7280’},
+];
+const catById = id => CATS.find(c=>c.id===id)||CATS[5];
+const CAR_EMOJIS = [‘🚗’,‘🚙’,‘🚕’,‘🏎’,‘🚓’,‘🚑’,‘🚒’,‘🚐’,‘🛻’,‘🚚’,‘🚌’,‘🏍’,‘🛵’,‘🚜’,‘🛺’];
+const DAYS_RU = [‘Вс’,‘Пн’,‘Вт’,‘Ср’,‘Чт’,‘Пт’,‘Сб’];
+const wEmoji = m => ({‘Snow’:‘❄️’,‘Rain’:‘🌧️’,‘Drizzle’:‘🌦️’,‘Thunderstorm’:‘⛈️’,‘Clear’:‘☀️’,‘Clouds’:‘☁️’}[m]||‘🌤️’);
+const TIRE_LBL = {summer:‘🌞 Летняя’,winter:‘❄️ Зимняя’,‘all-season’:‘🔄 Всесезон’};
+const PRI = {
+high:{color:’#EF4444’,label:‘🔴 Срочно’},
+medium:{color:’#F59E0B’,label:‘🟡 Скоро’},
+low:{color:’#10B981’,label:‘🟢 Не горит’},
+};
+const REM_T = [
+{id:‘oil’,label:‘Замена масла’,icon:‘🛢️’,km:10000,mo:12},
+{id:‘brakes’,label:‘Тормозные колодки’,icon:‘🛑’,km:30000,mo:null},
+{id:‘filters’,label:‘Воздушный фильтр’,icon:‘💨’,km:15000,mo:12},
+{id:‘anti’,label:‘Антифриз’,icon:‘🧊’,km:null,mo:24},
+{id:‘battery’,label:‘АКБ’,icon:‘🔋’,km:null,mo:36},
+{id:‘timing’,label:‘Ремень ГРМ’,icon:‘⚙️’,km:60000,mo:null},
+{id:‘tires’,label:‘Сезонная резина’,icon:‘🔄’,km:null,mo:6},
+{id:‘custom’,label:‘Своё’,icon:‘📝’,km:null,mo:null},
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const cRecs  = id => D.records.filter(r=>r.carId===id).sort((a,b)=>new Date(b.date)-new Date(a.date));
+const cRems  = id => (D.reminders||[]).filter(r=>r.carId===id);
+const cPlan  = id => (D.planned||[]).filter(p=>p.carId===id).sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1));
+const cSpent = id => cRecs(id).reduce((s,r)=>s+(parseFloat(r.cost)||0),0);
+const lastTire = id => cRecs(id).find(r=>r.category===‘tires’&&r.tireType);
+const fmt = n => n?parseInt(n).toLocaleString(‘ru’):’—’;
+const fmtMoney = n => n?parseFloat(n).toLocaleString(‘ru’)+’ ₽’:’—’;
+const fmtDate = s => s?new Date(s).toLocaleDateString(‘ru’,{day:‘numeric’,month:‘short’,year:‘numeric’}):’—’;
+const genQ = (car,rec) => `${rec.part||rec.title} ${car.make} ${car.model} ${car.year}${car.engine?' '+car.engine:''}`.trim();
+
+function remPct(rem) {
+const now=new Date(); let pct=0;
+if ((rem.intervalType===‘date’||rem.intervalType===‘both’)&&rem.lastDate&&rem.intervalMonths) {
+const l=new Date(rem.lastDate),n=new Date(l); n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
+pct=Math.max(pct,Math.min(Math.round(((now-l)/(n-l))*100),110));
+}
+if ((rem.intervalType===‘km’||rem.intervalType===‘both’)&&rem.lastKm&&rem.intervalKm&&rem.currentKm)
+pct=Math.max(pct,Math.min(Math.round(((rem.currentKm-rem.lastKm)/rem.intervalKm)*100),110));
+return pct;
+}
+function pColor(p){return p>=100?’#EF4444’:p>=75?’#F59E0B’:’#10B981’;}
+function daysLeft(rem) {
+if (!rem.lastDate||!rem.intervalMonths) return null;
+const n=new Date(rem.lastDate); n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
+return Math.round((n-new Date())/86400000);
+}
+
+function tireStatus(lt, forecast) {
+if (!lt?.tireType) return null;
+const t=lt.tireType;
+if (t===‘all-season’) return {level:‘ok’,msg:‘Всесезонная резина — всё хорошо’};
+const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+const deepW=(m===12&&d>5)||m===1||m===2||m===3;
+const deepS=(m===6&&d>5)||m===7||m===8;
+if (deepW&&t===‘summer’) return {level:‘danger’,msg:‘⛔ Летняя резина в зимних условиях! Резина не соответствует требованиям безопасности. Рекомендуем заменить или отказаться от поездки.’};
+if (deepS&&t===‘winter’) return {level:‘danger’,msg:‘⛔ Зимняя резина в летних условиях! Резина не соответствует требованиям безопасности. Рекомендуем заменить или отказаться от поездки.’};
+const inA=m===9||m===10||m===11||(m===12&&d<=5);
+const inSp=m===4||m===5||(m===6&&d<=5);
+if (forecast?.list) {
+const days=forecast.list.filter((_,i)=>i%8===0).slice(0,7);
+const mins=days.map(x=>x.main.temp_min),maxs=days.map(x=>x.main.temp_max);
+const snow=days.some(x=>x.weather[0].main===‘Snow’),frost=mins.some(x=>x<=0);
+const coldN=mins.filter(x=>x<7).length,warmD=maxs.filter(x=>x>10).length;
+const avgMin=mins.reduce((a,b)=>a+b,0)/mins.length,avgMax=maxs.reduce((a,b)=>a+b,0)/maxs.length;
+if (inA&&t===‘summer’) {
+if (snow||frost) return {level:‘critical’,msg:‘❄️ Ожидаются заморозки или снег! Срочно записывайся на переобувку.’};
+if (coldN>=4) return {level:‘warn’,msg:`🌡️ ${coldN} из 7 ночей прогноз ниже +7°C — пора планировать переобувку на зимнюю.`};
+return {level:‘ok’,msg:‘✅ Пока можно ездить на летней — заморозков не ожидается.’};
+}
+if (inSp&&t===‘winter’) {
+if (avgMax>15&&avgMin>7) return {level:‘critical’,msg:‘🔥 Стабильное тепло! Зимняя перегревается — пора менять на летнюю.’};
+if (warmD>=5&&avgMin>3) return {level:‘warn’,msg:`☀️ ${warmD} тёплых дней — стоит запланировать переобувку на летнюю.`};
+return {level:‘ok’,msg:‘✅ Пока прохладно — зимняя резина ок.’};
+}
+}
+if (inA&&t===‘summer’) return {level:‘warn’,msg:‘🍂 Осенний сезон — следи за прогнозом, скоро время переобуваться на зимнюю.’};
+if (inSp&&t===‘winter’) return {level:‘warn’,msg:‘🌸 Весенний сезон — следи за прогнозом, скоро время переобуваться на летнюю.’};
+return {level:‘ok’,msg:`✅ ${TIRE_LBL[t]} — сезон в норме`};
+}
+
+// ── Weather cache ─────────────────────────────────────────────────────────────
+let weatherData = null, forecastData = null;
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+let t = document.getElementById(‘toast’);
+if (!t) { t=document.createElement(‘div’); t.id=‘toast’; t.className=‘toast’; document.body.appendChild(t); }
+t.textContent = ’✓ ’+msg; t.style.display=‘flex’;
+clearTimeout(toastTimer);
+toastTimer = setTimeout(()=>{ if(t)t.style.display=‘none’; },2200);
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+const app = document.getElementById(‘app’);
+if (view===‘home’)   app.innerHTML = renderHome();
+if (view===‘car’)    app.innerHTML = renderCar();
+if (view===‘record’) app.innerHTML = renderRecord();
+bindEvents();
+}
+
+// ── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome() {
+const urgent = (D.reminders||[]).filter(r=>remPct(r)>=80);
+let alertsHtml = ‘’;
+if (urgent.length>0) {
+alertsHtml = `<div class="sec">⚠️ Требует внимания</div>`;
+urgent.slice(0,3).forEach(r=>{
+const c=D.cars.find(x=>x.id===r.carId), pct=remPct(r);
+alertsHtml += `<div class="alert ${pct>=100?'cr':'wn'}" data-action="goto-car" data-carid="${c?.id||''}"> <span style="font-size:22px">${r.icon}</span> <div><div style="font-size:13px;font-weight:600">${r.title}</div> <div style="font-size:12px;color:var(--m);margin-top:2px">${c?.make||''} ${c?.model||''} · ${pct>=100?'Просрочено!':pct+'% от интервала'}</div></div> </div>`;
+});
+}
+let carsHtml = ‘’;
+D.cars.forEach(c=>{
+const sp=cSpent(c.id), plans=cPlan(c.id);
+carsHtml += `<div class="card card-h" style="display:flex;gap:16px;align-items:center" data-action="goto-car" data-carid="${c.id}"> <div style="width:56px;height:56px;border-radius:14px;background:#3B82F622;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${c.emoji||'🚗'}</div> <div style="flex:1;min-width:0"> <div style="font-family:var(--fd);font-weight:700;font-size:17px">${c.make} ${c.model}</div> <div style="font-size:13px;color:var(--m);margin-top:2px">${c.year} · ${c.engine||'—'}</div> </div> <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"> <div style="background:var(--s2);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--m)">${cRecs(c.id).length} зап.</div> ${sp>0?`<div style="font-size:12px;color:var(--a);font-family:var(--fd);font-weight:700">${sp.toLocaleString(‘ru’)} ₽</div>`:''} ${plans.length>0?`<div style="font-size:11px;color:#F59E0B">📋 ${plans.length} в плане</div>`:''} </div> </div>`;
+});
+
+return `<div class="hdr"> <div class="logo">Car<span>Diary</span></div> <div style="font-size:12px;color:var(--m)">${D.cars.length} авто</div> </div> ${D.cars.length===0 ?`<div class="empty"><div class="empty-ico">🚗</div><h3>Нет автомобилей</h3><p>Добавь свою первую машину и начни вести дневник обслуживания</p></div>`:`<div style="padding:0 16px 110px">${alertsHtml}<div class="sec">Мои автомобили</div>${carsHtml}</div>` } <div class="fab-row"> <button class="fab" data-action="open-modal" data-modal="car">+ Добавить авто</button> </div>`;
+}
+
+// ── CAR DETAIL ───────────────────────────────────────────────────────────────
+function renderCar() {
+const car = D.cars.find(c=>c.id===selCarId); if (!car) { view=‘home’; return renderHome(); }
+const recs=cRecs(car.id), rems=cRems(car.id), plans=cPlan(car.id), lt=lastTire(car.id);
+
+// Tire widget
+let tireHtml = `<div class="sec">🌡️ Резина и погода</div>`;
+if (!lt) {
+tireHtml += `<div class="card" style="font-size:13px;color:var(--m);line-height:1.5;margin-bottom:4px">Добавь запись с категорией <strong style="color:#10B981">«Шины / Диски»</strong> и укажи тип резины — приложение будет анализировать когда переобуваться.</div>`;
+} else {
+const status = tireStatus(lt, forecastData);
+const bg=status?.level===‘danger’||status?.level===‘critical’?‘rgba(239,68,68,.06)’:status?.level===‘warn’?‘rgba(245,158,11,.06)’:‘var(–s)’;
+const bd=status?.level===‘danger’||status?.level===‘critical’?‘rgba(239,68,68,.25)’:status?.level===‘warn’?‘rgba(245,158,11,.2)’:‘var(–b)’;
+let wInner = ‘’;
+if (weatherData) {
+const days5=(forecastData?.list||[]).filter((_,i)=>i%8===0).slice(0,5);
+let fHtml = days5.map((d,i)=>` <div class="fday"> <div class="fdname">${i===0?'Сег':DAYS_RU[new Date(d.dt*1000).getDay()]}</div> <div style="font-size:18px">${wEmoji(d.weather[0].main)}</div> <div class="fdmax">${Math.round(d.main.temp_max)}°</div> <div class="fdmin">${Math.round(d.main.temp_min)}°</div> </div>`).join(’’);
+wInner = ` <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"> <div> <div style="display:flex;align-items:center;gap:8px"> <span style="font-size:36px">${wEmoji(weatherData.weather[0].main)}</span> <div><div class="wtemp">${Math.round(weatherData.main.temp)}°</div><div class="wdesc">${weatherData.weather[0].description}</div></div> </div> <div class="wcity">📍 ${weatherData.name} · ощущается ${Math.round(weatherData.main.feels_like)}°</div> </div> <button class="pbtn" style="font-size:11px" data-action="get-weather">🔄</button> </div> <div class="frow">${fHtml}</div>`;
+}
+tireHtml += `<div class="wcrd" style="background:${bg};border-color:${bd}"> <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:12px"> <span style="font-size:22px">${lt.tireType==='winter'?'❄️':lt.tireType==='all-season'?'🔄':'🌞'}</span> <div style="flex:1"> <div style="font-size:13px;font-weight:600">${TIRE_LBL[lt.tireType]||lt.tireType}</div> <div style="font-size:12px;color:var(--m)">Установлена ${new Date(lt.date).toLocaleDateString('ru',{day:'numeric',month:'long'})}${lt.mileage?' · '+parseInt(lt.mileage).toLocaleString('ru')+' км':''}</div> </div> ${!weatherData?`<button class="pbtn" style="font-size:11px;white-space:nowrap" data-action="get-weather">📍 Погода</button>`:''} </div> ${wInner} ${status?`<div class="tadvice ${status.level}">⚠️ ${status.msg}</div>`:''} </div>`;
+}
+
+// Reminders
+let remsHtml = ‘’;
+if (rems.length>0) {
+remsHtml = `<div class="sec">Напоминания</div><div class="card rcard">`;
+rems.forEach(r=>{
+const pct=remPct(r), color=pColor(pct), days=daysLeft(r);
+const badge=days!==null?(days<=0?‘Просрочено!’:days+’ дн.’):(pct>0?Math.min(pct,100)+’%’:’’);
+remsHtml += `<div class="rem"> <div class="rem-ico" style="background:${color}18">${r.icon}</div> <div class="rem-body"> <div class="rem-ttl">${r.title}</div> <div class="rem-meta">${r.intervalKm?'каждые '+parseInt(r.intervalKm).toLocaleString('ru')+' км':''}${r.intervalKm&&r.intervalMonths?' · ':''}${r.intervalMonths?'каждые '+r.intervalMonths+' мес.':''}</div> ${pct>0?`<div class="pbar"><div class="pfill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>`:''} </div> ${badge?`<div class="rbadge" style="background:${color}18;color:${color}">${badge}</div>`:''} <button class="ico-btn" style="width:32px;height:32px;border-radius:8px;flex-shrink:0" data-action="del-rem" data-id="${r.id}">✕</button> </div>`;
+});
+remsHtml += ‘</div>’;
+}
+
+// Plans
+let plansHtml = ‘’;
+if (plans.length>0) {
+plansHtml = `<div class="sec">🔧 Запланированный ремонт</div><div class="card rcard">`;
+plans.forEach(p=>{
+const pr=PRI[p.priority]||PRI.medium;
+const q=`${p.part||p.title} ${car.make} ${car.model} ${car.year}${car.engine?' '+car.engine:''}`.trim();
+plansHtml += `<div class="plan"> <div class="pbar2" style="background:${pr.color}"></div> <div class="plan-body"> <div class="plan-ttl">${p.title}${p.part?`<span style="font-size:12px;color:var(--m);font-weight:400;margin-left:6px">· ${p.part}</span>`:''}</div> <div class="plan-meta"> <span style="color:${pr.color};font-weight:600;font-size:11px">${pr.label}</span> ${p.estimatedCost?`<span>~${parseFloat(p.estimatedCost).toLocaleString(‘ru’)} ₽</span>`:''} ${p.deadline?`<span>до ${new Date(p.deadline).toLocaleDateString(‘ru’,{day:‘numeric’,month:‘short’})}</span>`:''} </div> ${p.notes?`<div style="font-size:13px;color:var(--m);line-height:1.5;margin-bottom:8px;padding:8px 10px;background:var(--s2);border-radius:10px">${p.notes}</div>`:''} <div class="plan-acts"> <button class="done-btn" data-action="done-plan" data-id="${p.id}">✓ Сделано</button> <a class="srch-btn" href="https://exist.ru/search/?q=${encodeURIComponent(q)}" target="_blank">🔍 Exist</a> <a class="srch-btn" href="https://www.avito.ru/rossiya?q=${encodeURIComponent(q)}" target="_blank">Avito</a> <button class="srch-btn" style="color:#EF4444;border-color:rgba(239,68,68,.2)" data-action="del-plan" data-id="${p.id}">🗑</button> </div> </div> </div>`;
+});
+plansHtml += ‘</div>’;
+}
+
+// Records
+let recsHtml = ‘’;
+if (recs.length===0) {
+recsHtml = `<div class="card" style="text-align:center;padding:32px"><div style="font-size:32px;margin-bottom:8px">📋</div><div style="color:var(--m);font-size:14px">Записей пока нет. Добавь первую.</div></div>`;
+} else {
+recsHtml = `<div class="card rcard">`;
+recs.forEach(rec=>{
+const cat=catById(rec.category);
+recsHtml += `<div class="rec" data-action="goto-rec" data-recid="${rec.id}"> <div class="rec-dot" style="background:${cat.color}"></div> <div class="rec-body"> <div class="rec-title">${rec.title}</div> ${rec.tireType?`<div style="font-size:12px;color:#10B981;margin-top:2px">${TIRE_LBL[rec.tireType]||’’}</div>`:''} ${rec.part?`<div style="font-size:12px;color:var(--m);margin-top:2px">Деталь: ${rec.part}</div>`:''} <div class="rec-meta"> <span>${fmtDate(rec.date)}</span> ${rec.mileage?`<span>${fmt(rec.mileage)} км</span>`:''} <span class="pill" style="background:${cat.color}22;color:${cat.color}">${cat.label}</span> </div> </div> ${rec.cost?`<div class="rec-cost">${parseFloat(rec.cost).toLocaleString(‘ru’)} ₽</div>`:''} </div>`;
+});
+const sp=cSpent(car.id);
+recsHtml += `<div class="total"><div style="font-size:13px;color:var(--m)">Итого потрачено</div><div style="font-family:var(--fd);font-size:20px;font-weight:800;color:var(--a)">${sp.toLocaleString('ru')} ₽</div></div></div>`;
+}
+
+return ` <div class="hdr"> <button class="ico-btn" data-action="go-home">◀</button> <div style="font-family:var(--fd);font-size:15px;font-weight:600">${car.make} ${car.model}</div> <div style="width:42px"></div> </div> <div class="wrap"> <div class="hero"> <div class="hero-top"> <div class="hero-ava">${car.emoji||'🚗'}</div> <div> <div class="hero-title">${car.make} ${car.model}</div> <div class="hero-sub">${car.year} · ${car.engine||'Двигатель не указан'}</div> ${car.vin?`<div style="font-size:12px;color:var(--m);margin-top:4px;font-family:monospace;letter-spacing:1px">${car.vin}</div>`:''} </div> </div> <div class="stats"> <div class="stat"><div class="stat-v">${recs.length}</div><div class="stat-k">Записей</div></div> <div class="stat"><div class="stat-v" style="font-size:14px">${cSpent(car.id).toLocaleString('ru')} ₽</div><div class="stat-k">Потрачено</div></div> <div class="stat"><div class="stat-v" style="font-size:${car.mileage?13:18}px">${car.mileage?parseInt(car.mileage).toLocaleString('ru')+' км':'—'}</div><div class="stat-k">Пробег</div></div> </div> </div> ${tireHtml} ${remsHtml} ${plansHtml} <div class="sec" style="margin-top:24px">История обслуживания</div> ${recsHtml} <button class="btn-del" style="margin-top:32px" data-action="del-car">🗑 Удалить автомобиль</button> </div> <div class="fab-row"> <button class="fab fab-ghost" data-action="open-modal" data-modal="rem">🔔 Напом.</button> <button class="fab fab-ghost fab-plan" data-action="open-modal" data-modal="plan">📋 В план</button> <button class="fab" data-action="open-modal" data-modal="rec">+ Запись</button> </div>`;
+}
+
+// ── RECORD DETAIL ────────────────────────────────────────────────────────────
+function renderRecord() {
+const car=D.cars.find(c=>c.id===selCarId), rec=D.records.find(r=>r.id===selRecId);
+if (!car||!rec) { view=‘car’; return renderCar(); }
+const cat=catById(rec.category), q=genQ(car,rec);
+return ` <div class="hdr"> <button class="ico-btn" data-action="go-car">◀</button> <div style="font-family:var(--fd);font-size:15px;font-weight:600">Запись</div> <div style="width:42px"></div> </div> <div class="wrap"> <div class="card" style="margin-bottom:14px"> <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px"> <div style="width:44px;height:44px;border-radius:12px;background:${cat.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🔧</div> <div> <div style="font-family:var(--fd);font-size:18px;font-weight:700">${rec.title}</div> ${rec.tireType?`<div style="font-size:13px;color:#10B981;margin-top:4px">${TIRE_LBL[rec.tireType]||’’}</div>`:''} <span class="pill" style="background:${cat.color}22;color:${cat.color};margin-top:6px;display:inline-flex">${cat.label}</span> </div> </div> <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"> ${[['Дата',fmtDate(rec.date)],['Пробег',rec.mileage?fmt(rec.mileage)+' км':'—'],['Стоимость',fmtMoney(rec.cost)],['Деталь',rec.part||'—']].map(([l,v])=>`
+<div class="stat"><div class="stat-k">${l}</div><div style="font-family:var(--fd);font-weight:600;font-size:13px;margin-top:4px">${v}</div></div>`).join('')} </div> ${rec.notes?`<div style="margin-top:14px;padding:14px;background:var(--s2);border-radius:12px;font-size:14px;line-height:1.5;color:var(--m)">${rec.notes}</div>`:''} </div> ${rec.category!=='fuel'?`
+<div class="qbox">
+<div class="qlbl">🔍 Готовый поисковый запрос</div>
+<div class="qtxt">${q}</div>
+<div class="qlinks">
+<button class="copybtn" data-action="copy-q" data-q="${encodeURIComponent(q)}">📋 Копировать</button>
+<a class="qlink" href="https://www.avito.ru/rossiya?q=${encodeURIComponent(q)}" target="_blank">Avito</a>
+<a class="qlink" href="https://exist.ru/search/?q=${encodeURIComponent(q)}" target="_blank">Exist</a>
+<a class="qlink" href="https://www.drom.ru/catalog/?q=${encodeURIComponent(q)}" target="_blank">Drom</a>
+<a class="qlink" href="https://yandex.ru/search/?text=${encodeURIComponent(q)}" target="_blank">Яндекс</a>
+</div>
+</div>`:''} <button class="btn-del" data-action="del-rec" data-id="${rec.id}">🗑 Удалить запись</button> </div>`;
+}
+
+// ── Modal renders ────────────────────────────────────────────────────────────
+function openModal(type) {
+closeModal();
+const ov = document.createElement(‘div’);
+ov.className=‘overlay’; ov.id=‘modal-overlay’;
+ov.addEventListener(‘click’, e=>{ if(e.target===ov)closeModal(); });
+let inner = ‘’;
+if (type===‘car’) inner = renderCarForm();
+if (type===‘rec’) inner = renderRecForm();
+if (type===‘rem’) inner = renderRemForm(1);
+if (type===‘plan’) inner = renderPlanForm();
+ov.innerHTML=`<div class="modal">${inner}</div>`;
+document.body.appendChild(ov);
+bindModalEvents(type);
+}
+
+function closeModal() {
+const ov=document.getElementById(‘modal-overlay’);
+if (ov) ov.remove();
+}
+
+function renderCarForm() {
+const emojis=CAR_EMOJIS.map(e=>`<div class="emj ${e==='🚗'?'on':''}" data-emj="${e}">${e}</div>`).join(’’);
+return `<div class="m-hdr"><div class="m-title">Новый автомобиль</div><button class="ico-btn" data-action="close-modal">✕</button></div> <div class="field"><label>Иконка</label><div class="emojis" id="emojis">${emojis}</div></div> <input type="hidden" id="car-emoji" value="🚗"/> <div class="row2"> <div class="field"><label>Марка *</label><input id="car-make" placeholder="Toyota"/></div> <div class="field"><label>Модель *</label><input id="car-model" placeholder="Camry"/></div> </div> <div class="row2"> <div class="field"><label>Год</label><input id="car-year" type="number" placeholder="2020" value="${new Date().getFullYear()}"/></div> <div class="field"><label>Двигатель</label><input id="car-engine" placeholder="2.5 2AR-FE"/></div> </div> <div class="field"><label>VIN</label><input id="car-vin" placeholder="JT..." style="font-family:monospace;letter-spacing:1px"/></div> <div class="field"><label>Пробег (км)</label><input id="car-mileage" type="number" placeholder="85000"/></div> <button class="btn-ok" data-action="save-car">Добавить автомобиль</button>`;
+}
+
+function renderRecForm() {
+const car=D.cars.find(c=>c.id===selCarId);
+const cats=CATS.map(c=>`<div class="cat ${c.id==='maintenance'?'on':''}" data-cat="${c.id}"><div class="cdot" style="background:${c.color}"></div>${c.label}</div>`).join(’’);
+return `<div class="m-hdr"><div class="m-title">Новая запись</div><button class="ico-btn" data-action="close-modal">✕</button></div> <div class="field"><label>Категория</label><div class="cats" id="cats">${cats}</div></div> <input type="hidden" id="rec-cat" value="maintenance"/> <div id="tire-type-row" style="display:none" class="field"><label>Тип резины</label> <select id="rec-tire"><option value="">— не указано —</option><option value="summer">🌞 Летняя</option><option value="winter">❄️ Зимняя</option><option value="all-season">🔄 Всесезонная</option></select> </div> <div class="field"><label>Что сделано *</label><input id="rec-title" placeholder="Замена масла и фильтров"/></div> <div class="field"><label>Деталь / запчасть</label><input id="rec-part" placeholder="Фильтр масляный Mann W713/75"/></div> <div class="row2"> <div class="field"><label>Дата</label><input id="rec-date" type="date" value="${new Date().toISOString().slice(0,10)}"/></div> <div class="field"><label>Пробег (км)</label><input id="rec-mileage" type="number" placeholder="85000" value="${car?.mileage||''}"/></div> </div> <div class="field"><label>Стоимость (₽)</label><input id="rec-cost" type="number" placeholder="3500"/></div> <div class="field"><label>Заметки</label><textarea id="rec-notes" placeholder="Использовал масло Shell 5W-40..."></textarea></div> <button class="btn-ok" data-action="save-rec">Сохранить запись</button>`;
+}
+
+function renderRemForm(step, tmpl) {
+if (step===1) {
+const t=REM_T.map(t=>`<div class="tmpl" data-remtmpl="${t.id}" data-km="${t.km||''}" data-mo="${t.mo||''}" data-lbl="${t.label}" data-ico="${t.icon}"><span style="font-size:20px">${t.icon}</span><span>${t.label}</span></div>`).join(’’);
+return `<div class="m-hdr"><div class="m-title">Тип напоминания</div><button class="ico-btn" data-action="close-modal">✕</button></div> <div style="font-size:13px;color:var(--m);margin-bottom:14px">Что хочешь отслеживать?</div> <div class="tmpls">${t}</div>`;
+}
+const car=D.cars.find(c=>c.id===selCarId);
+return `<div class="m-hdr"> <div style="display:flex;align-items:center;gap:10px"> <button class="ico-btn" style="width:32px;height:32px;border-radius:8px" data-action="rem-step1">◀</button> <div class="m-title">Настройка</div> </div> <button class="ico-btn" data-action="close-modal">✕</button></div> <input type="hidden" id="rem-icon" value="${tmpl?.icon||'🔔'}"/> <div class="field"><label>Название</label><input id="rem-title" value="${tmpl?.label||''}"/></div> <div class="field"> <label>Интервал</label> <div style="display:flex;gap:8px;margin-bottom:12px"> ${['km','date','both'].map((id,i)=>`<button class="pbtn ${id==='both'?'on':''}" data-itype="${id}">${[‘По пробегу’,‘По дате’,‘Оба’][i]}</button>`).join('')} </div> <input type="hidden" id="rem-itype" value="both"/> <div id="rem-km-row"><input style="width:100%;background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:11px 14px;color:var(--t);font-size:15px;outline:none;margin-bottom:8px" id="rem-km" type="number" placeholder="Каждые N км (напр. 10000)" value="${tmpl?.km||''}"/></div> <div id="rem-mo-row"><input style="width:100%;background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:11px 14px;color:var(--t);font-size:15px;outline:none" id="rem-mo" type="number" placeholder="Каждые N месяцев (напр. 6)" value="${tmpl?.mo||''}"/></div> </div> <div class="row2"> <div class="field"><label>Последний раз</label><input id="rem-ldate" type="date" value="${new Date().toISOString().slice(0,10)}"/></div> <div class="field"><label>Пробег тогда</label><input id="rem-lkm" type="number" value="${car?.mileage||''}"/></div> </div> <div class="field"><label>Текущий пробег (км)</label><input id="rem-ckm" type="number" value="${car?.mileage||''}"/></div> <button class="btn-ok" data-action="save-rem">Сохранить напоминание</button>`;
+}
+
+function renderPlanForm() {
+return `<div class="m-hdr"><div class="m-title">📋 Плановый ремонт</div><button class="ico-btn" data-action="close-modal">✕</button></div> <div style="font-size:13px;color:var(--m);margin-bottom:16px;line-height:1.4">Запиши что сервис рекомендовал — это не уйдёт в историю пока не нажмёшь «Сделано»</div> <div class="field"><label>Что нужно сделать *</label><input id="plan-title" placeholder="Замена передних тормозных колодок"/></div> <div class="field"><label>Деталь / запчасть</label><input id="plan-part" placeholder="Колодки Bosch BP1234"/></div> <div class="field"> <label>Приоритет</label> <div class="pri-sel"> <button class="pri-btn" data-pri="high">🔴 Срочно</button> <button class="pri-btn m" data-pri="medium">🟡 Скоро</button> <button class="pri-btn" data-pri="low">🟢 Не горит</button> </div> <input type="hidden" id="plan-pri" value="medium"/> </div> <div class="row2"> <div class="field"><label>Примерная стоимость</label><input id="plan-cost" type="number" placeholder="5000"/></div> <div class="field"><label>Сделать до</label><input id="plan-deadline" type="date"/></div> </div> <div class="field"><label>Заметки</label><textarea id="plan-notes" placeholder="Сервис сказал что колодки в критическом состоянии..."></textarea></div> <button class="btn-ok" data-action="save-plan">Добавить в план</button>`;
+}
+
+// ── Bind Events ──────────────────────────────────────────────────────────────
+function bindEvents() {
+document.querySelectorAll(’[data-action]’).forEach(el=>{
+el.addEventListener(‘click’, e=>{
+e.stopPropagation();
+handleAction(el.dataset.action, el.dataset);
+});
+});
+}
+
+function bindModalEvents(type) {
+bindEvents();
+// Emoji picker
+document.querySelectorAll(’.emj’).forEach(el=>{
+el.addEventListener(‘click’,()=>{
+document.querySelectorAll(’.emj’).forEach(x=>x.classList.remove(‘on’));
+el.classList.add(‘on’);
+document.getElementById(‘car-emoji’).value=el.dataset.emj;
+});
+});
+// Category picker
+document.querySelectorAll(’.cat’).forEach(el=>{
+el.addEventListener(‘click’,()=>{
+document.querySelectorAll(’.cat’).forEach(x=>x.classList.remove(‘on’));
+el.classList.add(‘on’);
+document.getElementById(‘rec-cat’).value=el.dataset.cat;
+const trow=document.getElementById(‘tire-type-row’);
+if (trow) trow.style.display=el.dataset.cat===‘tires’?‘block’:‘none’;
+});
+});
+// Reminder templates
+document.querySelectorAll(’[data-remtmpl]’).forEach(el=>{
+el.addEventListener(‘click’,()=>{
+const modal=document.querySelector(’.modal’);
+modal.innerHTML=renderRemForm(2,{icon:el.dataset.ico,label:el.dataset.lbl,km:el.dataset.km,mo:el.dataset.mo});
+bindModalEvents(‘rem2’);
+});
+});
+// Interval type
+document.querySelectorAll(’[data-itype]’).forEach(el=>{
+el.addEventListener(‘click’,()=>{
+document.querySelectorAll(’[data-itype]’).forEach(x=>x.classList.remove(‘on’));
+el.classList.add(‘on’);
+const v=el.dataset.itype;
+document.getElementById(‘rem-itype’).value=v;
+const kr=document.getElementById(‘rem-km-row’), mr=document.getElementById(‘rem-mo-row’);
+if(kr) kr.style.display=(v===‘km’||v===‘both’)?‘block’:‘none’;
+if(mr) mr.style.display=(v===‘date’||v===‘both’)?‘block’:‘none’;
+});
+});
+// Priority picker
+document.querySelectorAll(’[data-pri]’).forEach(el=>{
+el.addEventListener(‘click’,()=>{
+document.querySelectorAll(’[data-pri]’).forEach(x=>x.className=‘pri-btn’);
+const p=el.dataset.pri;
+el.className=’pri-btn ’+(p===‘high’?‘h’:p===‘medium’?‘m’:‘l’);
+document.getElementById(‘plan-pri’).value=p;
+});
+});
+}
+
+// ── Action Handler ───────────────────────────────────────────────────────────
+function handleAction(action, ds) {
+if (action===‘go-home’) { view=‘home’; render(); }
+else if (action===‘go-car’) { view=‘car’; render(); }
+else if (action===‘goto-car’ && ds.carid) { selCarId=ds.carid; view=‘car’; render(); }
+else if (action===‘goto-rec’ && ds.recid) { selRecId=ds.recid; view=‘record’; render(); }
+else if (action===‘open-modal’) { openModal(ds.modal); }
+else if (action===‘close-modal’) { closeModal(); }
+else if (action===‘rem-step1’) { document.querySelector(’.modal’).innerHTML=renderRemForm(1); bindModalEvents(‘rem’); }
+else if (action===‘get-weather’) { fetchWeather(); }
+else if (action===‘copy-q’) {
+const q=decodeURIComponent(ds.q);
+navigator.clipboard.writeText(q).then(()=>showToast(‘Запрос скопирован’));
+}
+else if (action===‘save-car’) {
+const make=val(‘car-make’), model=val(‘car-model’);
+if (!make||!model) return;
+D.cars.push({id:uid(),make,model,year:val(‘car-year’),engine:val(‘car-engine’),vin:val(‘car-vin’),mileage:val(‘car-mileage’),emoji:val(‘car-emoji’)||‘🚗’,createdAt:new Date().toISOString()});
+save(D); closeModal(); showToast(‘Автомобиль добавлен 🚗’); render();
+}
+else if (action===‘save-rec’) {
+const title=val(‘rec-title’); if(!title)return;
+D.records.push({id:uid(),carId:selCarId,title,category:val(‘rec-cat’)||‘maintenance’,tireType:val(‘rec-tire’)||’’,part:val(‘rec-part’),date:val(‘rec-date’)||new Date().toISOString().slice(0,10),mileage:val(‘rec-mileage’),cost:val(‘rec-cost’),notes:val(‘rec-notes’),createdAt:new Date().toISOString()});
+save(D); closeModal(); showToast(‘Запись добавлена ✓’); render();
+}
+else if (action===‘save-rem’) {
+const title=val(‘rem-title’); if(!title)return;
+if (!D.reminders) D.reminders=[];
+D.reminders.push({id:uid(),carId:selCarId,title,icon:val(‘rem-icon’)||‘🔔’,intervalType:val(‘rem-itype’)||‘both’,intervalKm:val(‘rem-km’),intervalMonths:val(‘rem-mo’),lastDate:val(‘rem-ldate’),lastKm:val(‘rem-lkm’),currentKm:val(‘rem-ckm’),createdAt:new Date().toISOString()});
+save(D); closeModal(); showToast(‘Напоминание добавлено 🔔’); render();
+}
+else if (action===‘save-plan’) {
+const title=val(‘plan-title’); if(!title)return;
+if (!D.planned) D.planned=[];
+D.planned.push({id:uid(),carId:selCarId,title,part:val(‘plan-part’),priority:val(‘plan-pri’)||‘medium’,estimatedCost:val(‘plan-cost’),deadline:val(‘plan-deadline’),notes:val(‘plan-notes’),category:‘repair’,createdAt:new Date().toISOString()});
+save(D); closeModal(); showToast(‘Добавлено в план 📋’); render();
+}
+else if (action===‘del-car’) {
+if (!confirm(‘Удалить автомобиль?’)) return;
+D.cars=D.cars.filter(c=>c.id!==selCarId);
+D.records=D.records.filter(r=>r.carId!==selCarId);
+D.reminders=(D.reminders||[]).filter(r=>r.carId!==selCarId);
+D.planned=(D.planned||[]).filter(p=>p.carId!==selCarId);
+save(D); view=‘home’; render();
+}
+else if (action===‘del-rec’) {
+if (!confirm(‘Удалить запись?’)) return;
+D.records=D.records.filter(r=>r.id!==ds.id);
+save(D); view=‘car’; render();
+}
+else if (action===‘del-rem’) {
+D.reminders=(D.reminders||[]).filter(r=>r.id!==ds.id);
+save(D); showToast(‘Удалено’); render();
+}
+else if (action===‘del-plan’) {
+D.planned=(D.planned||[]).filter(p=>p.id!==ds.id);
+save(D); showToast(‘Удалено из плана’); render();
+}
+else if (action===‘done-plan’) {
+const p=(D.planned||[]).find(x=>x.id===ds.id); if(!p)return;
+D.records.push({id:uid(),carId:p.carId,title:p.title,category:p.category||‘repair’,part:p.part||’’,date:new Date().toISOString().slice(0,10),mileage:’’,cost:p.estimatedCost||’’,notes:p.notes||’’,createdAt:new Date().toISOString()});
+D.planned=(D.planned||[]).filter(x=>x.id!==ds.id);
+save(D); showToast(‘Перенесено в историю ✓’); render();
+}
+}
+
+function val(id) { const el=document.getElementById(id); return el?el.value.trim():’’; }
+
+// ── Weather ──────────────────────────────────────────────────────────────────
+async function fetchWeather() {
+if (!navigator.geolocation) { showToast(‘Геолокация не поддерживается’); return; }
+showToast(‘Определяем местоположение…’);
+navigator.geolocation.getCurrentPosition(async pos=>{
+try {
+const K=‘bd5e378503939ddaee76f12ad7a97608’;
+const lat=pos.coords.latitude, lon=pos.coords.longitude;
+const [wr,fr]=await Promise.all([
+fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${K}`),
+fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${K}`),
+]);
+weatherData=await wr.json(); forecastData=await fr.json();
+if (weatherData.cod!==200) throw new Error();
+showToast(‘Погода загружена ✓’); render();
+} catch { showToast(‘Ошибка загрузки погоды’); }
+}, ()=>showToast(‘Нет доступа к геолокации’));
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+render();
 </script>
+
 </body>
 </html>
