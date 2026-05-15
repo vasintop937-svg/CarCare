@@ -257,11 +257,77 @@ select.inp option{background:var(--s2)}
 
 <div id="app"></div>
 <div class="toast" id="toast"></div>
+<div id="sync-ind" style="position:fixed;top:10px;right:10px;font-size:11px;color:var(--m);z-index:999;display:none">&#9729; sync...</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
+// Firebase config
+firebase.initializeApp({
+  apiKey: "AIzaSyAPAtCBZVbGJgyFZ682zYMpHif7CKzdtKs",
+  authDomain: "car-diary-d3e7f.firebaseapp.com",
+  projectId: "car-diary-d3e7f",
+  storageBucket: "car-diary-d3e7f.firebasestorage.app",
+  messagingSenderId: "724496184070",
+  appId: "1:724496184070:web:a5a8b5097e6e15c5f26487"
+});
+var db = firebase.firestore();
+
+// Device ID - unique per browser, stored in localStorage
 var SK = 'cardiary_v7';
-function load() { try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[]}; } catch(e) { return {cars:[],records:[],reminders:[],planned:[]}; } }
-function save(d) { try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {} }
+var DEVICE_KEY = 'cardiary_device_id';
+var deviceId = localStorage.getItem(DEVICE_KEY);
+if (!deviceId) { deviceId = 'dev_' + Math.random().toString(36).slice(2,18); localStorage.setItem(DEVICE_KEY, deviceId); }
+
+var docRef = db.collection('users').doc(deviceId);
+var syncInd = document.getElementById('sync-ind');
+
+function showSync() { syncInd.style.display = 'block'; }
+function hideSync() { syncInd.style.display = 'none'; }
+
+// Load from Firebase, fallback to localStorage
+function load() {
+  try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[]}; }
+  catch(e) { return {cars:[],records:[],reminders:[],planned:[]}; }
+}
+
+// Save to both localStorage and Firebase
+function save(d) {
+  try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {}
+  showSync();
+  docRef.set({data: JSON.stringify(d), updated: Date.now()})
+    .then(function() { hideSync(); })
+    .catch(function() { hideSync(); });
+}
+
+// On first load, try to get data from Firebase (newer than localStorage)
+function loadFromCloud(callback) {
+  showSync();
+  docRef.get().then(function(doc) {
+    hideSync();
+    if (doc.exists) {
+      var cloudData = JSON.parse(doc.data().data);
+      var localRaw = localStorage.getItem(SK);
+      var cloudUpdated = doc.data().updated || 0;
+      var localUpdated = 0;
+      try { var lp = JSON.parse(localRaw); localUpdated = lp._updated || 0; } catch(e) {}
+      // Use whichever is newer
+      if (cloudUpdated > localUpdated) {
+        localStorage.setItem(SK, doc.data().data);
+        callback(cloudData);
+      } else {
+        callback(load());
+      }
+    } else {
+      callback(load());
+    }
+  }).catch(function() {
+    hideSync();
+    callback(load());
+  });
+}
 var D = load();
 var uid = function() { return Math.random().toString(36).slice(2,10); };
 var view = 'home', selCarId = null, selRecId = null, toastTimer = null;
@@ -898,7 +964,11 @@ function fetchWeather() {
   }, function(){ showToast(T['weather-err']); });
 }
 
-render();
+// Start: load from Firebase first, fallback to localStorage
+loadFromCloud(function(cloudData) {
+  D = cloudData;
+  render();
+});
 </script>
 
 </body>
