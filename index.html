@@ -14,14 +14,14 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);min-height:100vh}
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg) 80%,transparent)}
 .logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px}
 .logo span{color:var(--a)}
-.ibtn{width:42px;height:42px;border-radius:12px;background:var(--s);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t);font-size:18px}
+.ibtn{min-width:42px;height:42px;border-radius:12px;background:var(--s);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t);font-size:16px;padding:0 10px}
 .card{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:20px;transition:all .2s}
 .cardh{cursor:pointer}
 .cardh:hover{border-color:rgba(200,255,0,.2);transform:translateY(-1px)}
 .wrap{padding:0 16px 140px}
 .sec{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--m);text-transform:uppercase;margin:20px 0 10px}
 .fabrow{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:40}
-.fab{background:var(--a);color:#0D0F14;border:none;border-radius:14px;padding:13px 20px;font-family:var(--fd);font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;cursor:pointer;box-shadow:0 8px 28px rgba(200,255,0,.25);white-space:nowrap}
+.fab{background:var(--a);color:#0D0F14;border:none;border-radius:14px;padding:13px 18px;font-family:var(--fd);font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;box-shadow:0 8px 28px rgba(200,255,0,.25);white-space:nowrap}
 .fabg{background:var(--s2);color:var(--t);border:1px solid var(--b);box-shadow:none}
 .fabp{color:#F59E0B;border:1px solid rgba(245,158,11,.3);background:var(--s2);box-shadow:none}
 .empty{text-align:center;padding:60px 32px}
@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);min-height:100vh}
 .hsub{color:var(--m);font-size:14px;margin-top:4px}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .stat{background:rgba(255,255,255,.04);border-radius:12px;padding:12px;border:1px solid var(--b)}
-.statv{font-family:var(--fd);font-size:17px;font-weight:700}
+.statv{font-family:var(--fd);font-size:16px;font-weight:700}
 .statk{font-size:11px;color:var(--m);margin-top:2px}
 .ri{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--b);cursor:pointer}
 .ri:last-child{border-bottom:none}
@@ -72,7 +72,6 @@ select.inp option{background:var(--s2)}
 .qtxt{font-family:var(--fd);font-size:16px;font-weight:600;line-height:1.4;margin-bottom:12px}
 .qlinks{display:flex;gap:8px;flex-wrap:wrap}
 .qlink{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:7px 12px;font-size:13px;text-decoration:none;color:var(--t);display:inline-flex;align-items:center}
-.qlink:hover{border-color:rgba(200,255,0,.3);color:var(--a)}
 .copybtn{background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.2);color:var(--a);border-radius:10px;padding:7px 12px;font-size:13px;cursor:pointer}
 .remi{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--b)}
 .remi:last-child{border-bottom:none}
@@ -120,744 +119,783 @@ select.inp option{background:var(--s2)}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--b);border-radius:4px}
 </style>
-</head>
-<body>
+
+<!-- All Russian text stored as data to avoid encoding issues -->
+
+<div id="txt" style="display:none"
+  data-app-name="CarDiary"
+  data-cars-count=" авто"
+  data-no-cars-title="нет автомобилей"
+  data-no-cars-desc="добавь свою первую машину и начни вести дневник"
+  data-add-car="+ Добавить авто"
+  data-attention="Требует внимания"
+  data-my-cars="Мои автомобили"
+  data-overdue="Просрочено!"
+  data-interval="% от интервала"
+  data-records="записей"
+  data-spent="Потрачено"
+  data-mileage-lbl="Пробег"
+  data-engine-unknown="Двигатель не указан"
+  data-no-records-title="Записей пока нет"
+  data-no-records-desc="Добавь первую запись о ТО или ремонте"
+  data-total="Итого потрачено"
+  data-history="История обслуживания"
+  data-reminders-lbl="Напоминания"
+  data-plan-lbl="Запланированный ремонт"
+  data-tire-lbl="Резина и погода"
+  data-tire-hint="Добавь запись Шины/Диски и укажи тип резины"
+  data-tire-summer="Летняя"
+  data-tire-winter="Зимняя"
+  data-tire-all="Всесезон"
+  data-installed="Установлена"
+  data-weather-btn="Погода"
+  data-weather-city="ощущается"
+  data-weather-loading="Загружаем прогноз..."
+  data-weather-err="Нет доступа к геолокации"
+  data-tire-ok-summer="Пока можно ездить на летней - заморозков не ожидается."
+  data-tire-ok-winter="Пока прохладно - зимняя резина ок."
+  data-tire-warn-autumn="Осенний сезон - следи за прогнозом, скоро время переобуваться."
+  data-tire-warn-spring="Весенний сезон - следи за прогнозом, скоро время переобуваться."
+  data-tire-cold="из 7 ночей прогноз ниже +7C - пора планировать переобувку."
+  data-tire-warm="теплых дней - стоит запланировать переобувку на летнюю."
+  data-tire-frost="Ожидаются заморозки! Срочно записывайся на переобувку."
+  data-tire-hot="Стабильное тепло! Зимняя перегревается - пора менять."
+  data-tire-danger-summer="Летняя резина зимой! Не соответствует требованиям безопасности."
+  data-tire-danger-winter="Зимняя резина летом! Не соответствует требованиям безопасности."
+  data-tire-allseason-ok="Всесезонная резина - всё хорошо"
+  data-tire-season-ok="сезон в норме"
+  data-del-car="Удалить автомобиль"
+  data-del-rec="Удалить запись"
+  data-del-confirm-car="Удалить автомобиль?"
+  data-del-confirm-rec="Удалить запись?"
+  data-done="Сделано"
+  data-done-toast="Перенесено в историю"
+  data-added-car="Автомобиль добавлен"
+  data-added-rec="Запись добавлена"
+  data-added-rem="Напоминание добавлено"
+  data-added-plan="Добавлено в план"
+  data-deleted="Удалено"
+  data-copied="Запрос скопирован"
+  data-search-lbl="Готовый поисковый запрос"
+  data-copy-btn="Копировать"
+  data-part-lbl="Деталь:"
+  data-date-lbl="Дата"
+  data-mileage-f="Пробег"
+  data-cost-lbl="Стоимость"
+  data-part-f="Деталь"
+  data-notes-lbl="Заметки"
+  data-record-lbl="Запись"
+  data-save-record="Сохранить запись"
+  data-new-record="Новая запись"
+  data-category-lbl="Категория"
+  data-tire-type="Тип резины"
+  data-what-done="Что сделано"
+  data-detail="Деталь / запчасть"
+  data-date-inp="Дата"
+  data-mil-inp="Пробег (км)"
+  data-cost-inp="Стоимость (\u20BD)"
+  data-notes-inp="Заметки"
+  data-new-car="Новый автомобиль"
+  data-icon-lbl="Иконка"
+  data-make-lbl="Марка"
+  data-model-lbl="Модель"
+  data-year-lbl="Год"
+  data-engine-lbl="Двигатель"
+  data-vin-lbl="VIN"
+  data-mil-lbl="Пробег (км)"
+  data-add-car-btn="Добавить автомобиль"
+  data-rem-title="Тип напоминания"
+  data-rem-what="Что хочешь отслеживать?"
+  data-rem-setup="Настройка"
+  data-rem-name="Название"
+  data-rem-interval="Интервал"
+  data-rem-bykm="По пробегу"
+  data-rem-bydate="По дате"
+  data-rem-both="Оба"
+  data-rem-kmhint="Каждые N км (напр. 10000)"
+  data-rem-mohint="Каждые N месяцев (напр. 6)"
+  data-rem-last="Последний раз"
+  data-rem-lastkm="Пробег тогда"
+  data-rem-cur="Текущий пробег (км)"
+  data-rem-save="Сохранить напоминание"
+  data-rem-every-km="каждые"
+  data-rem-km-unit="км"
+  data-rem-every="каждые"
+  data-rem-months="мес."
+  data-rem-days="дн."
+  data-plan-modal="Плановый ремонт"
+  data-plan-hint="Запиши что сервис рекомендовал - не уйдет в историю пока не нажмешь Сделано"
+  data-plan-what="Что нужно сделать"
+  data-plan-part="Деталь / запчасть"
+  data-plan-priority="Приоритет"
+  data-plan-urgent="Срочно"
+  data-plan-soon="Скоро"
+  data-plan-low="Не горит"
+  data-plan-cost="Примерная стоимость"
+  data-plan-deadline="Сделать до"
+  data-plan-notes="Заметки"
+  data-plan-add="Добавить в план"
+  data-plan-in="в плане"
+  data-remind="Напом."
+  data-to-plan="В план"
+  data-nav-record="Запись"
+  data-need-name="Укажи название"
+  data-need-make="Укажи марку и модель"
+  data-geo-unsupported="Геолокация не поддерживается"
+  data-geo-detecting="Определяем местоположение..."
+  data-weather-loaded="Погода загружена"
+  data-weather-fail="Ошибка загрузки погоды"
+  data-days-su="\u0412\u0441"
+  data-days-mo="\u041f\u043d"
+  data-days-tu="\u0412\u0442"
+  data-days-we="\u0421\u0440"
+  data-days-th="\u0427\u0442"
+  data-days-fr="\u041f\u0442"
+  data-days-sa="\u0421\u0431"
+  data-today="\u0421\u0435\u0433"
+></div>
+
 <div id="app"></div>
 <div class="toast" id="toast"></div>
+
 <script>
-var SK='cardiary_v6';
-function load(){try{var r=localStorage.getItem(SK);return r?JSON.parse(r):{cars:[],records:[],reminders:[],planned:[]};}catch(e){return{cars:[],records:[],reminders:[],planned:[]};}}
-function save(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
-var D=load();
-var uid=function(){return Math.random().toString(36).slice(2,10);};
-var view='home', selCarId=null, selRecId=null, toastTimer=null;
-var weatherData=null, forecastData=null;
+var SK = 'cardiary_v7';
+function load() { try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[]}; } catch(e) { return {cars:[],records:[],reminders:[],planned:[]}; } }
+function save(d) { try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {} }
+var D = load();
+var uid = function() { return Math.random().toString(36).slice(2,10); };
+var view = 'home', selCarId = null, selRecId = null, toastTimer = null;
+var weatherData = null, forecastData = null;
 
-var CATS=[
-{id:‘maintenance’,label:‘ТО / Обслуживание’,color:’#3B82F6’},
-{id:‘repair’,label:‘Ремонт’,color:’#EF4444’},
-{id:‘tires’,label:‘Шины / Диски’,color:’#10B981’},
-{id:‘fuel’,label:‘Топливо’,color:’#F59E0B’},
-{id:‘insurance’,label:‘Страховка / Доки’,color:’#8B5CF6’},
-{id:‘other’,label:‘Прочее’,color:’#6B7280’}
+// Load all text from data attributes (avoids encoding issues)
+var T = {};
+(function() {
+  var el = document.getElementById('txt');
+  var attrs = el.attributes;
+  for (var i = 0; i < attrs.length; i++) {
+    var name = attrs[i].name;
+    if (name.indexOf('data-') === 0) {
+      T[name.slice(5)] = attrs[i].value;
+    }
+  }
+})();
+
+var DAYS = [T['days-su'], T['days-mo'], T['days-tu'], T['days-we'], T['days-th'], T['days-fr'], T['days-sa']];
+
+var CATS = [
+  {id:'maintenance', label:'TO / Obsluzhivanie', color:'#3B82F6', ru:''},
+  {id:'repair',      label:'Remont',             color:'#EF4444', ru:''},
+  {id:'tires',       label:'Shiny / Diski',      color:'#10B981', ru:''},
+  {id:'fuel',        label:'Toplivo',             color:'#F59E0B', ru:''},
+  {id:'insurance',   label:'Strakhovka',          color:'#8B5CF6', ru:''},
+  {id:'other',       label:'Prochee',             color:'#6B7280', ru:''}
 ];
-var EMOJIS=[‘🚗’,‘🚙’,‘🚕’,‘🏎’,‘🚓’,‘🚑’,‘🚒’,‘🚐’,‘🛻’,‘🚚’,‘🚌’,‘🏍’,‘🛵’,‘🚜’,‘🛺’];
-var DAYS=[‘Вс’,‘Пн’,‘Вт’,‘Ср’,‘Чт’,‘Пт’,‘Сб’];
-var TIRE_LBL={summer:‘🌞 Летняя’,winter:‘❄️ Зимняя’,‘all-season’:‘🔄 Всесезон’};
-var PRI={high:{color:’#EF4444’,label:‘🔴 Срочно’},medium:{color:’#F59E0B’,label:‘🟡 Скоро’},low:{color:’#10B981’,label:‘🟢 Не горит’}};
-var REM_T=[
-{id:‘oil’,label:‘Замена масла’,icon:‘🛢’,km:10000,mo:12},
-{id:‘brakes’,label:‘Тормозные колодки’,icon:‘🛑’,km:30000,mo:null},
-{id:‘filters’,label:‘Воздушный фильтр’,icon:‘💨’,km:15000,mo:12},
-{id:‘anti’,label:‘Антифриз’,icon:‘🧊’,km:null,mo:24},
-{id:‘battery’,label:‘АКБ’,icon:‘🔋’,km:null,mo:36},
-{id:‘timing’,label:‘Ремень ГРМ’,icon:‘⚙’,km:60000,mo:null},
-{id:‘tires’,label:‘Сезонная резина’,icon:‘🔄’,km:null,mo:6},
-{id:‘custom’,label:‘Своё’,icon:‘📝’,km:null,mo:null}
-];
 
-function catById(id){for(var i=0;i<CATS.length;i++){if(CATS[i].id===id)return CATS[i];}return CATS[5];}
-function cRecs(id){return D.records.filter(function(r){return r.carId===id;}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});}
-function cRems(id){return (D.reminders||[]).filter(function(r){return r.carId===id;});}
-function cPlan(id){return (D.planned||[]).filter(function(p){return p.carId===id;}).sort(function(a,b){var o={high:0,medium:1,low:2};return (o[a.priority]||1)-(o[b.priority]||1);});}
-function cSpent(id){return cRecs(id).reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);}
-function lastTire(id){var recs=cRecs(id);for(var i=0;i<recs.length;i++){if(recs[i].category===‘tires’&&recs[i].tireType)return recs[i];}return null;}
-function fmt(n){return n?parseInt(n).toLocaleString(‘ru’):’—’;}
-function fmtMoney(n){return n?parseFloat(n).toLocaleString(‘ru’)+’ ₽’:’—’;}
-function fmtDate(s){return s?new Date(s).toLocaleDateString(‘ru’,{day:‘numeric’,month:‘short’,year:‘numeric’}):’—’;}
-function genQ(car,rec){return ((rec.part||rec.title)+’ ‘+car.make+’ ‘+car.model+’ ‘+car.year+(car.engine?’ ‘+car.engine:’’)).trim();}
-function wEmoji(m){var map={Snow:‘❄️’,Rain:‘🌧’,Drizzle:‘🌦’,Thunderstorm:‘⛈’,Clear:‘☀️’,Clouds:‘☁️’};return map[m]||‘🌤’;}
+// Set Russian labels from data attributes
+var catLabels = ['\u0422\u041e / \u041e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435', '\u0420\u0435\u043c\u043e\u043d\u0442', '\u0428\u0438\u043d\u044b / \u0414\u0438\u0441\u043a\u0438', '\u0422\u043e\u043f\u043b\u0438\u0432\u043e', '\u0421\u0442\u0440\u0430\u0445\u043e\u0432\u043a\u0430 / \u0414\u043e\u043a\u0438', '\u041f\u0440\u043e\u0447\u0435\u0435'];
+for (var i = 0; i < CATS.length; i++) { CATS[i].ru = catLabels[i]; }
 
-function remPct(rem){
-var now=new Date(),pct=0;
-if((rem.intervalType===‘date’||rem.intervalType===‘both’)&&rem.lastDate&&rem.intervalMonths){
-var l=new Date(rem.lastDate),n=new Date(l);n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
-pct=Math.max(pct,Math.min(Math.round(((now-l)/(n-l))*100),110));
-}
-if((rem.intervalType===‘km’||rem.intervalType===‘both’)&&rem.lastKm&&rem.intervalKm&&rem.currentKm)
-pct=Math.max(pct,Math.min(Math.round(((rem.currentKm-rem.lastKm)/rem.intervalKm)*100),110));
-return pct;
-}
-function pColor(p){return p>=100?’#EF4444’:p>=75?’#F59E0B’:’#10B981’;}
-function daysLeft(rem){
-if(!rem.lastDate||!rem.intervalMonths)return null;
-var n=new Date(rem.lastDate);n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
-return Math.round((n-new Date())/86400000);
-}
+var EMOJIS = ['\ud83d\ude97','\ud83d\ude99','\ud83d\ude95','\ud83c\udfce','\ud83d\ude93','\ud83d\ude91','\ud83d\ude92','\ud83d\ude90','\ud83d\udefa','\ud83d\ude9a','\ud83d\ude8c','\ud83c\udfd4','\ud83d\udef5','\ud83d\ude9c','\ud83d\udebe'];
 
-function tireStatus(lt,forecast){
-if(!lt||!lt.tireType)return null;
-var t=lt.tireType;
-if(t===‘all-season’)return{level:‘ok’,msg:‘Всесезонная резина — всё хорошо’};
-var now=new Date(),m=now.getMonth()+1,d=now.getDate();
-var deepW=(m===12&&d>5)||m===1||m===2||m===3;
-var deepS=(m===6&&d>5)||m===7||m===8;
-if(deepW&&t===‘summer’)return{level:‘danger’,msg:‘⛔ Летняя резина зимой! Не соответствует требованиям безопасности. Рекомендуем заменить или отказаться от поездки.’};
-if(deepS&&t===‘winter’)return{level:‘danger’,msg:‘⛔ Зимняя резина летом! Не соответствует требованиям безопасности. Рекомендуем заменить или отказаться от поездки.’};
-var inA=m===9||m===10||m===11||(m===12&&d<=5);
-var inSp=m===4||m===5||(m===6&&d<=5);
-if(forecast&&forecast.list){
-var days=forecast.list.filter(function(_,i){return i%8===0;}).slice(0,7);
-var mins=days.map(function(x){return x.main.temp_min;});
-var maxs=days.map(function(x){return x.main.temp_max;});
-var snow=days.some(function(x){return x.weather[0].main===‘Snow’;});
-var frost=mins.some(function(x){return x<=0;});
-var coldN=mins.filter(function(x){return x<7;}).length;
-var warmD=maxs.filter(function(x){return x>10;}).length;
-var avgMin=mins.reduce(function(a,b){return a+b;},0)/mins.length;
-var avgMax=maxs.reduce(function(a,b){return a+b;},0)/maxs.length;
-if(inA&&t===‘summer’){
-if(snow||frost)return{level:‘critical’,msg:‘❄️ Ожидаются заморозки! Срочно записывайся на переобувку.’};
-if(coldN>=4)return{level:‘warn’,msg:coldN+’ из 7 ночей прогноз ниже +7°C — пора планировать переобувку.’};
-return{level:‘ok’,msg:‘✅ Пока можно ездить на летней — заморозков не ожидается.’};
+var REM_ICONS = ['\ud83d\udee2','\ud83d\uded1','\ud83d\udca8','\ud83e\uddca','\ud83d\udd0b','\u2699','\ud83d\udd04','\ud83d\udcdd'];
+var REM_LABELS = ['\u0417\u0430\u043c\u0435\u043d\u0430 \u043c\u0430\u0441\u043b\u0430', '\u0422\u043e\u0440\u043c\u043e\u0437\u043d\u044b\u0435 \u043a\u043e\u043b\u043e\u0434\u043a\u0438', '\u0412\u043e\u0437\u0434\u0443\u0448\u043d\u044b\u0439 \u0444\u0438\u043b\u044c\u0442\u0440', '\u0410\u043d\u0442\u0438\u0444\u0440\u0438\u0437', '\u0410\u041a\u0411', '\u0420\u0435\u043c\u0435\u043d\u044c \u0413\u0420\u041c', '\u0421\u0435\u0437\u043e\u043d\u043d\u0430\u044f \u0440\u0435\u0437\u0438\u043d\u0430', '\u0421\u0432\u043e\u0451'];
+var REM_KM    = [10000, 30000, 15000, null, null, 60000, null, null];
+var REM_MO    = [12,    null,  12,    24,   36,   null,  6,    null];
+
+var PRI_COLOR = {high:'#EF4444', medium:'#F59E0B', low:'#10B981'};
+var PRI_LABEL = {
+  high:   '\ud83d\udd34 \u0421\u0440\u043e\u0447\u043d\u043e',
+  medium: '\ud83d\udfe1 \u0421\u043a\u043e\u0440\u043e',
+  low:    '\ud83d\udfe2 \u041d\u0435 \u0433\u043e\u0440\u0438\u0442'
+};
+
+function catById(id) { for (var i = 0; i < CATS.length; i++) { if (CATS[i].id === id) return CATS[i]; } return CATS[5]; }
+function cRecs(id) { return D.records.filter(function(r){return r.carId===id;}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}); }
+function cRems(id) { return (D.reminders||[]).filter(function(r){return r.carId===id;}); }
+function cPlan(id) { return (D.planned||[]).filter(function(p){return p.carId===id;}).sort(function(a,b){ var o={high:0,medium:1,low:2}; return (o[a.priority]||1)-(o[b.priority]||1); }); }
+function cSpent(id) { return cRecs(id).reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0); }
+function lastTire(id) { var recs=cRecs(id); for(var i=0;i<recs.length;i++){if(recs[i].category==='tires'&&recs[i].tireType)return recs[i];} return null; }
+
+function fmtNum(n) { return n ? parseInt(n).toLocaleString('ru') : '-'; }
+function fmtMoney(n) { return n ? parseFloat(n).toLocaleString('ru')+' \u20BD' : '-'; }
+function fmtDate(s) { return s ? new Date(s).toLocaleDateString('ru',{day:'numeric',month:'short',year:'numeric'}) : '-'; }
+function fmtDateShort(s) { return s ? new Date(s).toLocaleDateString('ru',{day:'numeric',month:'long'}) : ''; }
+function genQ(car,rec) { return ((rec.part||rec.title)+' '+car.make+' '+car.model+' '+car.year+(car.engine?' '+car.engine:'')).trim(); }
+function wEmoji(m) { var map={Snow:'\u2744\ufe0f',Rain:'\ud83c\udf27',Drizzle:'\ud83c\udf26',Thunderstorm:'\u26c8',Clear:'\u2600\ufe0f',Clouds:'\u2601\ufe0f'}; return map[m]||'\ud83c\udf24'; }
+
+function remPct(rem) {
+  var now=new Date(), pct=0;
+  if ((rem.intervalType==='date'||rem.intervalType==='both') && rem.lastDate && rem.intervalMonths) {
+    var l=new Date(rem.lastDate), n=new Date(l); n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
+    pct = Math.max(pct, Math.min(Math.round(((now-l)/(n-l))*100), 110));
+  }
+  if ((rem.intervalType==='km'||rem.intervalType==='both') && rem.lastKm && rem.intervalKm && rem.currentKm)
+    pct = Math.max(pct, Math.min(Math.round(((rem.currentKm-rem.lastKm)/rem.intervalKm)*100), 110));
+  return pct;
 }
-if(inSp&&t===‘winter’){
-if(avgMax>15&&avgMin>7)return{level:‘critical’,msg:‘🔥 Стабильное тепло! Зимняя перегревается — пора менять.’};
-if(warmD>=5&&avgMin>3)return{level:‘warn’,msg:warmD+’ тёплых дней — стоит запланировать переобувку на летнюю.’};
-return{level:‘ok’,msg:‘✅ Пока прохладно — зимняя резина ок.’};
-}
-}
-if(inA&&t===‘summer’)return{level:‘warn’,msg:‘🍂 Осенний сезон — следи за прогнозом, скоро время переобуваться.’};
-if(inSp&&t===‘winter’)return{level:‘warn’,msg:‘🌸 Весенний сезон — следи за прогнозом, скоро время переобуваться.’};
-return{level:‘ok’,msg:‘✅ ‘+(TIRE_LBL[t]||t)+’ — сезон в норме’};
+function pColor(p) { return p>=100?'#EF4444':p>=75?'#F59E0B':'#10B981'; }
+function daysLeft(rem) {
+  if (!rem.lastDate||!rem.intervalMonths) return null;
+  var n=new Date(rem.lastDate); n.setMonth(n.getMonth()+parseInt(rem.intervalMonths));
+  return Math.round((n-new Date())/86400000);
 }
 
-function showToast(msg){
-var t=document.getElementById(‘toast’);
-t.textContent=’✓ ’+msg;t.style.display=‘block’;
-clearTimeout(toastTimer);
-toastTimer=setTimeout(function(){t.style.display=‘none’;},2200);
+function tireStatus(lt, forecast) {
+  if (!lt||!lt.tireType) return null;
+  var t = lt.tireType;
+  if (t==='all-season') return {level:'ok', msg:T['tire-allseason-ok']};
+  var now=new Date(), m=now.getMonth()+1, d=now.getDate();
+  var deepW = (m===12&&d>5)||m===1||m===2||m===3;
+  var deepS = (m===6&&d>5)||m===7||m===8;
+  if (deepW&&t==='summer') return {level:'danger', msg:T['tire-danger-summer']};
+  if (deepS&&t==='winter') return {level:'danger', msg:T['tire-danger-winter']};
+  var inA = m===9||m===10||m===11||(m===12&&d<=5);
+  var inSp = m===4||m===5||(m===6&&d<=5);
+  if (forecast&&forecast.list) {
+    var days=forecast.list.filter(function(_,i){return i%8===0;}).slice(0,7);
+    var mins=days.map(function(x){return x.main.temp_min;});
+    var maxs=days.map(function(x){return x.main.temp_max;});
+    var snow=days.some(function(x){return x.weather[0].main==='Snow';});
+    var frost=mins.some(function(x){return x<=0;});
+    var coldN=mins.filter(function(x){return x<7;}).length;
+    var warmD=maxs.filter(function(x){return x>10;}).length;
+    var avgMin=mins.reduce(function(a,b){return a+b;},0)/mins.length;
+    var avgMax=maxs.reduce(function(a,b){return a+b;},0)/maxs.length;
+    if (inA&&t==='summer') {
+      if (snow||frost) return {level:'critical', msg:T['tire-frost']};
+      if (coldN>=4) return {level:'warn', msg:coldN+' '+T['tire-cold']};
+      return {level:'ok', msg:T['tire-ok-summer']};
+    }
+    if (inSp&&t==='winter') {
+      if (avgMax>15&&avgMin>7) return {level:'critical', msg:T['tire-hot']};
+      if (warmD>=5&&avgMin>3) return {level:'warn', msg:warmD+' '+T['tire-warm']};
+      return {level:'ok', msg:T['tire-ok-winter']};
+    }
+  }
+  if (inA&&t==='summer') return {level:'warn', msg:T['tire-warn-autumn']};
+  if (inSp&&t==='winter') return {level:'warn', msg:T['tire-warn-spring']};
+  var tLabel = t==='summer'?T['tire-summer']:t==='winter'?T['tire-winter']:T['tire-all'];
+  return {level:'ok', msg:tLabel+' - '+T['tire-season-ok']};
 }
 
-function el(tag,attrs,children){
-var e=document.createElement(tag);
-if(attrs){Object.keys(attrs).forEach(function(k){
-if(k===‘className’)e.className=attrs[k];
-else if(k===‘style’)e.style.cssText=attrs[k];
-else if(k===‘html’)e.innerHTML=attrs[k];
-else if(k===‘text’)e.textContent=attrs[k];
-else if(k.startsWith(‘on’))e.addEventListener(k.slice(2).toLowerCase(),attrs[k]);
-else e.setAttribute(k,attrs[k]);
-});}
-if(children){[].concat(children).forEach(function(c){if(c)e.appendChild(typeof c===‘string’?document.createTextNode(c):c);});}
-return e;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){t.style.display='none';}, 2200);
 }
 
-function render(){
-var app=document.getElementById(‘app’);
-app.innerHTML=’’;
-if(view===‘home’)app.appendChild(renderHome());
-else if(view===‘car’)app.appendChild(renderCar());
-else if(view===‘record’)app.appendChild(renderRecord());
+function mk(tag, attrs, children) {
+  var e = document.createElement(tag);
+  if (attrs) {
+    Object.keys(attrs).forEach(function(k) {
+      if (k==='cls') e.className = attrs[k];
+      else if (k==='css') e.style.cssText = attrs[k];
+      else if (k==='txt') e.textContent = attrs[k];
+      else if (k==='html') e.innerHTML = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    });
+  }
+  if (children) {
+    [].concat(children).forEach(function(c) {
+      if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+  }
+  return e;
+}
+function on(el, ev, fn) { el.addEventListener(ev, fn); return el; }
+
+function render() {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  if (view==='home') app.appendChild(buildHome());
+  else if (view==='car') app.appendChild(buildCar());
+  else if (view==='record') app.appendChild(buildRecord());
 }
 
-// ── HOME ──────────────────────────────────────────────────────────────────────
-function renderHome(){
-var div=el(‘div’);
-// header
-var hdr=el(‘div’,{className:‘hdr’});
-hdr.appendChild(el(‘div’,{className:‘logo’},[‘Car’,el(‘span’,{text:‘Diary’})]));
-hdr.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m)’,text:D.cars.length+’ авто’}));
-div.appendChild(hdr);
+function buildHome() {
+  var div = mk('div');
+  var hdr = mk('div',{cls:'hdr'});
+  var logo = mk('div',{cls:'logo'});
+  logo.appendChild(document.createTextNode('Car'));
+  logo.appendChild(mk('span',{txt:'Diary'}));
+  hdr.appendChild(logo);
+  hdr.appendChild(mk('div',{css:'font-size:12px;color:var(--m)', txt:D.cars.length+T['cars-count']}));
+  div.appendChild(hdr);
 
-if(D.cars.length===0){
-var empty=el(‘div’,{className:‘empty’});
-empty.appendChild(el(‘div’,{style:‘font-size:48px;margin-bottom:16px’,text:‘🚗’}));
-empty.appendChild(el(‘h3’,{text:‘Нет автомобилей’}));
-empty.appendChild(el(‘p’,{text:‘Добавь свою первую машину и начни вести дневник обслуживания’}));
-div.appendChild(empty);
-} else {
-var wrap=el(‘div’,{style:‘padding:0 16px 110px’});
-// urgent reminders
-var urgent=(D.reminders||[]).filter(function(r){return remPct(r)>=80;});
-if(urgent.length>0){
-wrap.appendChild(el(‘div’,{className:‘sec’,text:‘⚠️ Требует внимания’}));
-urgent.slice(0,3).forEach(function(r){
-var c=D.cars.filter(function(x){return x.id===r.carId;})[0];
-var pct=remPct(r);
-var a=el(‘div’,{className:‘alert ‘+(pct>=100?‘alcr’:‘alwn’)});
-a.appendChild(el(‘span’,{style:‘font-size:22px’,text:r.icon}));
-var ab=el(‘div’);
-ab.appendChild(el(‘div’,{style:‘font-size:13px;font-weight:600’,text:r.title}));
-ab.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m);margin-top:2px’,text:(c?c.make+’ ‘+c.model:’’)+(pct>=100?’ · Просрочено!’:’ · ‘+pct+’% от интервала’)}));
-a.appendChild(ab);
-a.addEventListener(‘click’,function(){if(c){selCarId=c.id;view=‘car’;render();}});
-wrap.appendChild(a);
-});
-}
-wrap.appendChild(el(‘div’,{className:‘sec’,text:‘Мои автомобили’}));
-D.cars.forEach(function(c){
-var card=el(‘div’,{className:‘card cardh’,style:‘display:flex;gap:16px;align-items:center’});
-card.appendChild(el(‘div’,{style:‘width:56px;height:56px;border-radius:14px;background:#3B82F622;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0’,text:c.emoji||‘🚗’}));
-var ci=el(‘div’,{style:‘flex:1;min-width:0’});
-ci.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-weight:700;font-size:17px’,text:c.make+’ ‘+c.model}));
-ci.appendChild(el(‘div’,{style:‘font-size:13px;color:var(–m);margin-top:2px’,text:c.year+’ · ‘+(c.engine||’—’)}));
-card.appendChild(ci);
-var cr=el(‘div’,{style:‘display:flex;flex-direction:column;align-items:flex-end;gap:4px’});
-cr.appendChild(el(‘div’,{style:‘background:var(–s2);border-radius:8px;padding:4px 10px;font-size:12px;color:var(–m)’,text:cRecs(c.id).length+’ зап.’}));
-var sp=cSpent(c.id);
-if(sp>0)cr.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–a);font-family:var(–fd);font-weight:700’,text:sp.toLocaleString(‘ru’)+’ ₽’}));
-var pl=cPlan(c.id).length;
-if(pl>0)cr.appendChild(el(‘div’,{style:‘font-size:11px;color:#F59E0B’,text:‘📋 ‘+pl+’ в плане’}));
-card.appendChild(cr);
-card.addEventListener(‘click’,function(){selCarId=c.id;view=‘car’;render();});
-wrap.appendChild(card);
-});
-div.appendChild(wrap);
-}
-var fabrow=el(‘div’,{className:‘fabrow’});
-var btn=el(‘button’,{className:‘fab’,text:’+ Добавить авто’});
-btn.addEventListener(‘click’,function(){openModal(‘car’);});
-fabrow.appendChild(btn);
-div.appendChild(fabrow);
-return div;
+  if (D.cars.length === 0) {
+    var empty = mk('div',{cls:'empty'});
+    empty.appendChild(mk('div',{css:'font-size:48px;margin-bottom:16px', txt:'\ud83d\ude97'}));
+    empty.appendChild(mk('h3',{txt:T['no-cars-title']}));
+    empty.appendChild(mk('p',{txt:T['no-cars-desc']}));
+    div.appendChild(empty);
+  } else {
+    var wrap = mk('div',{css:'padding:0 16px 110px'});
+    var urgent = (D.reminders||[]).filter(function(r){return remPct(r)>=80;});
+    if (urgent.length > 0) {
+      wrap.appendChild(mk('div',{cls:'sec', txt:'\u26a0\ufe0f '+T['attention']}));
+      urgent.slice(0,3).forEach(function(r) {
+        var c = D.cars.filter(function(x){return x.id===r.carId;})[0];
+        var pct = remPct(r);
+        var a = mk('div',{cls:'alert '+(pct>=100?'alcr':'alwn')});
+        a.appendChild(mk('span',{css:'font-size:22px', txt:r.icon||'\ud83d\udd14'}));
+        var ab = mk('div');
+        ab.appendChild(mk('div',{css:'font-size:13px;font-weight:600', txt:r.title}));
+        ab.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:2px', txt:(c?c.make+' '+c.model:'')+(pct>=100?' \u00b7 '+T['overdue']:' \u00b7 '+pct+T['interval'])}));
+        a.appendChild(ab);
+        (function(carId){on(a,'click',function(){if(carId){selCarId=carId;view='car';render();}});})(c?c.id:null);
+        wrap.appendChild(a);
+      });
+    }
+    wrap.appendChild(mk('div',{cls:'sec', txt:T['my-cars']}));
+    D.cars.forEach(function(c) {
+      var card = mk('div',{cls:'card cardh', css:'display:flex;gap:16px;align-items:center'});
+      card.appendChild(mk('div',{css:'width:56px;height:56px;border-radius:14px;background:#3B82F622;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0', txt:c.emoji||'\ud83d\ude97'}));
+      var ci = mk('div',{css:'flex:1;min-width:0'});
+      ci.appendChild(mk('div',{css:'font-family:var(--fd);font-weight:700;font-size:17px', txt:c.make+' '+c.model}));
+      ci.appendChild(mk('div',{css:'font-size:13px;color:var(--m);margin-top:2px', txt:c.year+' \u00b7 '+(c.engine||'\u2014')}));
+      card.appendChild(ci);
+      var cr = mk('div',{css:'display:flex;flex-direction:column;align-items:flex-end;gap:4px'});
+      cr.appendChild(mk('div',{css:'background:var(--s2);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--m)', txt:cRecs(c.id).length+' '+T['records']}));
+      var sp = cSpent(c.id);
+      if (sp > 0) cr.appendChild(mk('div',{css:'font-size:12px;color:var(--a);font-family:var(--fd);font-weight:700', txt:sp.toLocaleString('ru')+' \u20BD'}));
+      var pl = cPlan(c.id).length;
+      if (pl > 0) cr.appendChild(mk('div',{css:'font-size:11px;color:#F59E0B', txt:'\ud83d\udccb '+pl+' '+T['plan-in']}));
+      card.appendChild(cr);
+      (function(id){on(card,'click',function(){selCarId=id;view='car';render();});})(c.id);
+      wrap.appendChild(card);
+    });
+    div.appendChild(wrap);
+  }
+  var fabrow = mk('div',{cls:'fabrow'});
+  fabrow.appendChild(on(mk('button',{cls:'fab', txt:T['add-car']}), 'click', function(){openModal('car');}));
+  div.appendChild(fabrow);
+  return div;
 }
 
-// ── CAR DETAIL ────────────────────────────────────────────────────────────────
-function renderCar(){
-var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
-if(!car){view=‘home’;return renderHome();}
-var recs=cRecs(car.id),rems=cRems(car.id),plans=cPlan(car.id),lt=lastTire(car.id);
-var div=el(‘div’);
+function buildCar() {
+  var car = D.cars.filter(function(c){return c.id===selCarId;})[0];
+  if (!car) { view='home'; return buildHome(); }
+  var recs=cRecs(car.id), rems=cRems(car.id), plans=cPlan(car.id), lt=lastTire(car.id);
+  var div = mk('div');
+  var hdr = mk('div',{cls:'hdr'});
+  hdr.appendChild(on(mk('button',{cls:'ibtn', txt:'\u25c4'}), 'click', function(){view='home';selCarId=null;render();}));
+  hdr.appendChild(mk('div',{css:'font-family:var(--fd);font-size:15px;font-weight:600', txt:car.make+' '+car.model}));
+  hdr.appendChild(mk('div',{css:'width:42px'}));
+  div.appendChild(hdr);
+  var wrap = mk('div',{cls:'wrap'});
 
-// header
-var hdr=el(‘div’,{className:‘hdr’});
-var back=el(‘button’,{className:‘ibtn’,text:‘◀’});
-back.addEventListener(‘click’,function(){view=‘home’;selCarId=null;render();});
-hdr.appendChild(back);
-hdr.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-size:15px;font-weight:600’,text:car.make+’ ’+car.model}));
-hdr.appendChild(el(‘div’,{style:‘width:42px’}));
-div.appendChild(hdr);
-
-var wrap=el(‘div’,{className:‘wrap’});
-
-// hero
-var hero=el(‘div’,{className:‘hero’});
-var htop=el(‘div’,{className:‘htop’});
-htop.appendChild(el(‘div’,{className:‘hava’,text:car.emoji||‘🚗’}));
-var hi=el(‘div’);
-hi.appendChild(el(‘div’,{className:‘htitle’,text:car.make+’ ‘+car.model}));
-hi.appendChild(el(‘div’,{className:‘hsub’,text:car.year+’ · ‘+(car.engine||‘Двигатель не указан’)}));
-if(car.vin)hi.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m);margin-top:4px;font-family:monospace;letter-spacing:1px’,text:car.vin}));
-htop.appendChild(hi);
-hero.appendChild(htop);
-var stats=el(‘div’,{className:‘stats’});
-[[recs.length,‘Записей’],[cSpent(car.id).toLocaleString(‘ru’)+’ ₽’,‘Потрачено’],[(car.mileage?parseInt(car.mileage).toLocaleString(‘ru’)+’ км’:’—’),‘Пробег’]].forEach(function(s){
-var st=el(‘div’,{className:‘stat’});
-st.appendChild(el(‘div’,{className:‘statv’,style:‘font-size:14px’,text:’’+s[0]}));
-st.appendChild(el(‘div’,{className:‘statk’,text:s[1]}));
-stats.appendChild(st);
-});
-hero.appendChild(stats);
-wrap.appendChild(hero);
-
-// tire widget
-wrap.appendChild(renderTireWidget(car,lt));
-
-// reminders
-if(rems.length>0){
-wrap.appendChild(el(‘div’,{className:‘sec’,text:‘Напоминания’}));
-var rc=el(‘div’,{className:‘card rcard’});
-rems.forEach(function(r){rc.appendChild(renderRemItem(r));});
-wrap.appendChild(rc);
-}
-
-// plans
-if(plans.length>0){
-wrap.appendChild(el(‘div’,{className:‘sec’,text:‘🔧 Запланированный ремонт’}));
-var pc=el(‘div’,{className:‘card rcard’});
-plans.forEach(function(p){pc.appendChild(renderPlanItem(p,car));});
-wrap.appendChild(pc);
-}
-
-// records
-wrap.appendChild(el(‘div’,{className:‘sec’,style:‘margin-top:24px’,text:‘История обслуживания’}));
-if(recs.length===0){
-var empty=el(‘div’,{className:‘card’,style:‘text-align:center;padding:32px’});
-empty.appendChild(el(‘div’,{style:‘font-size:32px;margin-bottom:8px’,text:‘📋’}));
-empty.appendChild(el(‘div’,{style:‘color:var(–m);font-size:14px’,text:‘Записей пока нет. Добавь первую.’}));
-wrap.appendChild(empty);
-} else {
-var rcard=el(‘div’,{className:‘card rcard’});
-recs.forEach(function(rec){
-var cat=catById(rec.category);
-var row=el(‘div’,{className:‘ri’});
-row.appendChild(el(‘div’,{className:‘rdot’,style:‘background:’+cat.color}));
-var rb=el(‘div’,{className:‘rb’});
-rb.appendChild(el(‘div’,{className:‘rt’,text:rec.title}));
-if(rec.tireType)rb.appendChild(el(‘div’,{style:‘font-size:12px;color:#10B981;margin-top:2px’,text:TIRE_LBL[rec.tireType]||rec.tireType}));
-if(rec.part)rb.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m);margin-top:2px’,text:‘Деталь: ‘+rec.part}));
-var meta=el(‘div’,{className:‘rm’});
-meta.appendChild(el(‘span’,{text:fmtDate(rec.date)}));
-if(rec.mileage)meta.appendChild(el(‘span’,{text:fmt(rec.mileage)+’ км’}));
-var pill=el(‘span’,{className:‘pill’,style:‘background:’+cat.color+‘22;color:’+cat.color,text:cat.label});
-meta.appendChild(pill);
-rb.appendChild(meta);
-row.appendChild(rb);
-if(rec.cost)row.appendChild(el(‘div’,{className:‘rc’,text:parseFloat(rec.cost).toLocaleString(‘ru’)+’ ₽’}));
-row.addEventListener(‘click’,function(){selRecId=rec.id;view=‘record’;render();});
-rcard.appendChild(row);
-});
-var total=el(‘div’,{className:‘total’});
-total.appendChild(el(‘div’,{style:‘font-size:13px;color:var(–m)’,text:‘Итого потрачено’}));
-total.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-size:20px;font-weight:800;color:var(–a)’,text:cSpent(car.id).toLocaleString(‘ru’)+’ ₽’}));
-rcard.appendChild(total);
-wrap.appendChild(rcard);
-}
-
-// delete
-var delBtn=el(‘button’,{className:‘btndel’,text:‘🗑 Удалить автомобиль’,style:‘margin-top:32px’});
-delBtn.addEventListener(‘click’,function(){
-if(!confirm(‘Удалить ‘+car.make+’ ‘+car.model+’?’))return;
-D.cars=D.cars.filter(function(c){return c.id!==car.id;});
-D.records=D.records.filter(function(r){return r.carId!==car.id;});
-D.reminders=(D.reminders||[]).filter(function(r){return r.carId!==car.id;});
-D.planned=(D.planned||[]).filter(function(p){return p.carId!==car.id;});
-save(D);view=‘home’;render();
-});
-wrap.appendChild(delBtn);
-div.appendChild(wrap);
-
-// fabs
-var fabrow=el(‘div’,{className:‘fabrow’});
-var b1=el(‘button’,{className:‘fab fabg’,text:‘🔔 Напом.’});
-b1.addEventListener(‘click’,function(){openModal(‘rem’);});
-var b2=el(‘button’,{className:‘fab fabp’,text:‘📋 В план’});
-b2.addEventListener(‘click’,function(){openModal(‘plan’);});
-var b3=el(‘button’,{className:‘fab’,text:’+ Запись’});
-b3.addEventListener(‘click’,function(){openModal(‘rec’);});
-fabrow.appendChild(b1);fabrow.appendChild(b2);fabrow.appendChild(b3);
-div.appendChild(fabrow);
-return div;
-}
-
-function renderTireWidget(car,lt){
-var wrap=el(‘div’);
-wrap.appendChild(el(‘div’,{className:‘sec’,text:‘🌡️ Резина и погода’}));
-if(!lt){
-var info=el(‘div’,{className:‘card’,style:‘font-size:13px;color:var(–m);line-height:1.5;margin-bottom:4px’});
-info.innerHTML=‘Добавь запись с категорией <strong style="color:#10B981">«Шины / Диски»</strong> и укажи тип резины — приложение будет анализировать когда переобуваться.’;
-wrap.appendChild(info);
-return wrap;
-}
-var status=tireStatus(lt,forecastData);
-var bg=status&&(status.level===‘danger’||status.level===‘critical’)?‘rgba(239,68,68,.06)’:status&&status.level===‘warn’?‘rgba(245,158,11,.06)’:‘var(–s)’;
-var bd=status&&(status.level===‘danger’||status.level===‘critical’)?‘rgba(239,68,68,.25)’:status&&status.level===‘warn’?‘rgba(245,158,11,.2)’:‘var(–b)’;
-var crd=el(‘div’,{className:‘wcrd’,style:‘background:’+bg+’;border-color:’+bd});
-
-// tire info row
-var trow=el(‘div’,{style:‘display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:12px’});
-trow.appendChild(el(‘span’,{style:‘font-size:22px’,text:lt.tireType===‘winter’?‘❄️’:lt.tireType===‘all-season’?‘🔄’:‘🌞’}));
-var ti=el(‘div’,{style:‘flex:1’});
-ti.appendChild(el(‘div’,{style:‘font-size:13px;font-weight:600’,text:TIRE_LBL[lt.tireType]||lt.tireType}));
-ti.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m)’,text:‘Установлена ‘+new Date(lt.date).toLocaleDateString(‘ru’,{day:‘numeric’,month:‘long’})+(lt.mileage?’ · ‘+parseInt(lt.mileage).toLocaleString(‘ru’)+’ км’:’’)}));
-trow.appendChild(ti);
-if(!weatherData){
-var wb=el(‘button’,{className:‘pbtn’,style:‘font-size:11px;white-space:nowrap’,text:‘📍 Погода’});
-wb.addEventListener(‘click’,fetchWeather);
-trow.appendChild(wb);
-}
-crd.appendChild(trow);
-
-// weather data
-if(weatherData){
-var wtop=el(‘div’,{style:‘display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px’});
-var wl=el(‘div’);
-var wrow=el(‘div’,{style:‘display:flex;align-items:center;gap:8px’});
-wrow.appendChild(el(‘span’,{style:‘font-size:36px’,text:wEmoji(weatherData.weather[0].main)}));
-var wt=el(‘div’);
-wt.appendChild(el(‘div’,{className:‘wtemp’,text:Math.round(weatherData.main.temp)+‘°’}));
-wt.appendChild(el(‘div’,{style:‘font-size:13px;color:var(–m);margin-top:3px’,text:weatherData.weather[0].description}));
-wrow.appendChild(wt);
-wl.appendChild(wrow);
-wl.appendChild(el(‘div’,{style:‘font-size:12px;color:var(–m);margin-top:6px’,text:’📍 ‘+weatherData.name+’ · ощущается ’+Math.round(weatherData.main.feels_like)+‘°’}));
-wtop.appendChild(wl);
-var rb=el(‘button’,{className:‘pbtn’,style:‘font-size:11px’,text:‘🔄’});
-rb.addEventListener(‘click’,fetchWeather);
-wtop.appendChild(rb);
-crd.appendChild(wtop);
-
-```
-if(forecastData&&forecastData.list){
-  var frow=el('div',{className:'frow'});
-  forecastData.list.filter(function(_,i){return i%8===0;}).slice(0,5).forEach(function(d,i){
-    var day=el('div',{className:'fday'});
-    var dt=new Date(d.dt*1000);
-    day.appendChild(el('div',{className:'fdnm',text:i===0?'Сег':DAYS[dt.getDay()]}));
-    day.appendChild(el('div',{style:'font-size:18px',text:wEmoji(d.weather[0].main)}));
-    day.appendChild(el('div',{className:'fdmx',text:Math.round(d.main.temp_max)+'°'}));
-    day.appendChild(el('div',{className:'fdmn',text:Math.round(d.main.temp_min)+'°'}));
-    frow.appendChild(day);
+  // hero
+  var hero = mk('div',{cls:'hero'});
+  var htop = mk('div',{cls:'htop'});
+  htop.appendChild(mk('div',{cls:'hava', txt:car.emoji||'\ud83d\ude97'}));
+  var hi = mk('div');
+  hi.appendChild(mk('div',{cls:'htitle', txt:car.make+' '+car.model}));
+  hi.appendChild(mk('div',{cls:'hsub', txt:car.year+' \u00b7 '+(car.engine||T['engine-unknown'])}));
+  if (car.vin) hi.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:4px;font-family:monospace;letter-spacing:1px', txt:car.vin}));
+  htop.appendChild(hi); hero.appendChild(htop);
+  var sts = mk('div',{cls:'stats'});
+  [[recs.length,T['records']],[cSpent(car.id).toLocaleString('ru')+' \u20BD',T['spent']],[(car.mileage?parseInt(car.mileage).toLocaleString('ru')+' \u043a\u043c':'\u2014'),T['mileage-lbl']]].forEach(function(s){
+    var st=mk('div',{cls:'stat'}); st.appendChild(mk('div',{cls:'statv',css:'font-size:14px',txt:''+s[0]})); st.appendChild(mk('div',{cls:'statk',txt:s[1]})); sts.appendChild(st);
   });
-  crd.appendChild(frow);
-}
-```
+  hero.appendChild(sts); wrap.appendChild(hero);
 
-}
+  // tire widget
+  wrap.appendChild(buildTireWidget(car,lt));
 
-if(status){
-var cls=’tadvice ’+(status.level===‘ok’?‘tok’:status.level===‘warn’?‘twarn’:‘tcrit’);
-crd.appendChild(el(‘div’,{className:cls,text:status.msg}));
-}
-wrap.appendChild(crd);
-return wrap;
-}
+  // reminders
+  if (rems.length > 0) {
+    wrap.appendChild(mk('div',{cls:'sec', txt:T['reminders-lbl']}));
+    var rc = mk('div',{cls:'card rcard'});
+    rems.forEach(function(r){rc.appendChild(buildRemItem(r));});
+    wrap.appendChild(rc);
+  }
 
-function renderRemItem(r){
-var pct=remPct(r),color=pColor(pct),days=daysLeft(r);
-var badge=days!==null?(days<=0?‘Просрочено!’:days+’ дн.’):(pct>0?Math.min(pct,100)+’%’:’’);
-var row=el(‘div’,{className:‘remi’});
-row.appendChild(el(‘div’,{className:‘remico’,style:‘background:’+color+‘18’,text:r.icon}));
-var rb=el(‘div’,{className:‘remb’});
-rb.appendChild(el(‘div’,{className:‘remttl’,text:r.title}));
-var meta=(r.intervalKm?‘каждые ‘+parseInt(r.intervalKm).toLocaleString(‘ru’)+’ км’:’’)+(r.intervalKm&&r.intervalMonths?’ · ‘:’’)+(r.intervalMonths?‘каждые ‘+r.intervalMonths+’ мес.’:’’);
-rb.appendChild(el(‘div’,{className:‘remmeta’,text:meta}));
-if(pct>0){var pb=el(‘div’,{className:‘pbar’});pb.appendChild(el(‘div’,{className:‘pfill’,style:‘width:’+Math.min(pct,100)+’%;background:’+color}));rb.appendChild(pb);}
-row.appendChild(rb);
-if(badge)row.appendChild(el(‘div’,{className:‘rbadge’,style:‘background:’+color+‘18;color:’+color,text:badge}));
-var del=el(‘button’,{className:‘ibtn’,style:‘width:32px;height:32px;border-radius:8px;flex-shrink:0’,text:‘✕’});
-del.addEventListener(‘click’,function(){D.reminders=(D.reminders||[]).filter(function(x){return x.id!==r.id;});save(D);showToast(‘Удалено’);render();});
-row.appendChild(del);
-return row;
-}
+  // plans
+  if (plans.length > 0) {
+    wrap.appendChild(mk('div',{cls:'sec', txt:'\ud83d\udd27 '+T['plan-lbl']}));
+    var pc = mk('div',{cls:'card rcard'});
+    plans.forEach(function(p){pc.appendChild(buildPlanItem(p,car));});
+    wrap.appendChild(pc);
+  }
 
-function renderPlanItem(p,car){
-var pr=PRI[p.priority]||PRI.medium;
-var q=genQ(car,p);
-var row=el(‘div’,{className:‘plan’});
-row.appendChild(el(‘div’,{className:‘planbar’,style:‘background:’+pr.color}));
-var pb=el(‘div’,{className:‘planb’});
-var ttl=el(‘div’,{className:‘planttl’,text:p.title});
-if(p.part)ttl.appendChild(el(‘span’,{style:‘font-size:12px;color:var(–m);font-weight:400;margin-left:6px’,text:’· ‘+p.part}));
-pb.appendChild(ttl);
-var meta=el(‘div’,{className:‘planmeta’});
-meta.appendChild(el(‘span’,{style:‘color:’+pr.color+’;font-weight:600;font-size:11px’,text:pr.label}));
-if(p.estimatedCost)meta.appendChild(el(‘span’,{text:’~’+parseFloat(p.estimatedCost).toLocaleString(‘ru’)+’ ₽’}));
-if(p.deadline)meta.appendChild(el(‘span’,{text:‘до ‘+new Date(p.deadline).toLocaleDateString(‘ru’,{day:‘numeric’,month:‘short’})}));
-pb.appendChild(meta);
-if(p.notes){var notes=el(‘div’,{style:‘font-size:13px;color:var(–m);line-height:1.5;margin-bottom:8px;padding:8px 10px;background:var(–s2);border-radius:10px’,text:p.notes});pb.appendChild(notes);}
-var acts=el(‘div’,{className:‘planacts’});
-var done=el(‘button’,{className:‘donebtn’,text:‘✓ Сделано’});
-done.addEventListener(‘click’,function(){
-D.records.push({id:uid(),carId:p.carId,title:p.title,category:p.category||‘repair’,part:p.part||’’,date:new Date().toISOString().slice(0,10),mileage:’’,cost:p.estimatedCost||’’,notes:p.notes||’’,createdAt:new Date().toISOString()});
-D.planned=(D.planned||[]).filter(function(x){return x.id!==p.id;});
-save(D);showToast(‘Перенесено в историю ✓’);render();
-});
-acts.appendChild(done);
-var a1=el(‘a’,{className:‘sbtn’,text:‘🔍 Exist’,href:‘https://exist.ru/search/?q=’+encodeURIComponent(q),target:’_blank’});
-var a2=el(‘a’,{className:‘sbtn’,text:‘Avito’,href:‘https://www.avito.ru/rossiya?q=’+encodeURIComponent(q),target:’_blank’});
-acts.appendChild(a1);acts.appendChild(a2);
-var del=el(‘button’,{className:‘sbtn’,style:‘color:#EF4444;border-color:rgba(239,68,68,.2)’,text:‘🗑’});
-del.addEventListener(‘click’,function(){D.planned=(D.planned||[]).filter(function(x){return x.id!==p.id;});save(D);showToast(‘Удалено’);render();});
-acts.appendChild(del);
-pb.appendChild(acts);
-row.appendChild(pb);
-return row;
-}
+  // records
+  wrap.appendChild(mk('div',{cls:'sec', css:'margin-top:24px', txt:T['history']}));
+  if (recs.length === 0) {
+    var empty = mk('div',{cls:'card', css:'text-align:center;padding:32px'});
+    empty.appendChild(mk('div',{css:'font-size:32px;margin-bottom:8px', txt:'\ud83d\udccb'}));
+    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px', txt:T['no-records-title']+'. '+T['no-records-desc']+'.' }));
+    wrap.appendChild(empty);
+  } else {
+    var rcard = mk('div',{cls:'card rcard'});
+    recs.forEach(function(rec) {
+      var cat = catById(rec.category);
+      var row = mk('div',{cls:'ri'});
+      row.appendChild(mk('div',{cls:'rdot', css:'background:'+cat.color}));
+      var rb = mk('div',{cls:'rb'});
+      rb.appendChild(mk('div',{cls:'rt', txt:rec.title}));
+      if (rec.tireType) { var tl = rec.tireType==='summer'?T['tire-summer']:rec.tireType==='winter'?T['tire-winter']:T['tire-all']; rb.appendChild(mk('div',{css:'font-size:12px;color:#10B981;margin-top:2px', txt:tl})); }
+      if (rec.part) rb.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:2px', txt:T['part-lbl']+' '+rec.part}));
+      var meta = mk('div',{cls:'rm'});
+      meta.appendChild(mk('span',{txt:fmtDate(rec.date)}));
+      if (rec.mileage) meta.appendChild(mk('span',{txt:fmtNum(rec.mileage)+' \u043a\u043c'}));
+      meta.appendChild(mk('span',{cls:'pill', css:'background:'+cat.color+'22;color:'+cat.color, txt:cat.ru}));
+      rb.appendChild(meta); row.appendChild(rb);
+      if (rec.cost) row.appendChild(mk('div',{cls:'rc', txt:parseFloat(rec.cost).toLocaleString('ru')+' \u20BD'}));
+      (function(id){on(row,'click',function(){selRecId=id;view='record';render();});})(rec.id);
+      rcard.appendChild(row);
+    });
+    var total = mk('div',{cls:'total'});
+    total.appendChild(mk('div',{css:'font-size:13px;color:var(--m)', txt:T['total']}));
+    total.appendChild(mk('div',{css:'font-family:var(--fd);font-size:20px;font-weight:800;color:var(--a)', txt:cSpent(car.id).toLocaleString('ru')+' \u20BD'}));
+    rcard.appendChild(total); wrap.appendChild(rcard);
+  }
+  var delBtn = on(mk('button',{cls:'btndel', css:'margin-top:32px', txt:'\ud83d\uddd1 '+T['del-car']}), 'click', function(){
+    if (!confirm(T['del-confirm-car'])) return;
+    D.cars=D.cars.filter(function(c){return c.id!==car.id;});
+    D.records=D.records.filter(function(r){return r.carId!==car.id;});
+    D.reminders=(D.reminders||[]).filter(function(r){return r.carId!==car.id;});
+    D.planned=(D.planned||[]).filter(function(p){return p.carId!==car.id;});
+    save(D); view='home'; render();
+  });
+  wrap.appendChild(delBtn); div.appendChild(wrap);
 
-// ── RECORD DETAIL ─────────────────────────────────────────────────────────────
-function renderRecord(){
-var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
-var rec=D.records.filter(function(r){return r.id===selRecId;})[0];
-if(!car||!rec){view=‘car’;return renderCar();}
-var cat=catById(rec.category),q=genQ(car,rec);
-var div=el(‘div’);
-var hdr=el(‘div’,{className:‘hdr’});
-var back=el(‘button’,{className:‘ibtn’,text:‘◀’});
-back.addEventListener(‘click’,function(){view=‘car’;render();});
-hdr.appendChild(back);
-hdr.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-size:15px;font-weight:600’,text:‘Запись’}));
-hdr.appendChild(el(‘div’,{style:‘width:42px’}));
-div.appendChild(hdr);
-var wrap=el(‘div’,{className:‘wrap’});
-var card=el(‘div’,{className:‘card’,style:‘margin-bottom:14px’});
-var top=el(‘div’,{style:‘display:flex;gap:12px;align-items:flex-start;margin-bottom:16px’});
-top.appendChild(el(‘div’,{style:‘width:44px;height:44px;border-radius:12px;background:’+cat.color+‘22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px’,text:‘🔧’}));
-var ti=el(‘div’);
-ti.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-size:18px;font-weight:700’,text:rec.title}));
-if(rec.tireType)ti.appendChild(el(‘div’,{style:‘font-size:13px;color:#10B981;margin-top:4px’,text:TIRE_LBL[rec.tireType]||rec.tireType}));
-ti.appendChild(el(‘span’,{className:‘pill’,style:‘background:’+cat.color+‘22;color:’+cat.color+’;margin-top:6px;display:inline-flex’,text:cat.label}));
-top.appendChild(ti);
-card.appendChild(top);
-var grid=el(‘div’,{style:‘display:grid;grid-template-columns:1fr 1fr;gap:10px’});
-[[‘Дата’,fmtDate(rec.date)],[‘Пробег’,rec.mileage?fmt(rec.mileage)+’ км’:’—’],[‘Стоимость’,fmtMoney(rec.cost)],[‘Деталь’,rec.part||’—’]].forEach(function(s){
-var st=el(‘div’,{className:‘stat’});
-st.appendChild(el(‘div’,{className:‘statk’,text:s[0]}));
-st.appendChild(el(‘div’,{style:‘font-family:var(–fd);font-weight:600;font-size:13px;margin-top:4px’,text:s[1]}));
-grid.appendChild(st);
-});
-card.appendChild(grid);
-if(rec.notes)card.appendChild(el(‘div’,{style:‘margin-top:14px;padding:14px;background:var(–s2);border-radius:12px;font-size:14px;line-height:1.5;color:var(–m)’,text:rec.notes}));
-wrap.appendChild(card);
-if(rec.category!==‘fuel’){
-var qbox=el(‘div’,{className:‘qbox’});
-qbox.appendChild(el(‘div’,{className:‘qlbl’,text:‘🔍 Готовый поисковый запрос’}));
-qbox.appendChild(el(‘div’,{className:‘qtxt’,text:q}));
-var ql=el(‘div’,{className:‘qlinks’});
-var cb=el(‘button’,{className:‘copybtn’,text:‘📋 Копировать’});
-cb.addEventListener(‘click’,function(){navigator.clipboard.writeText(q).then(function(){showToast(‘Запрос скопирован’);});});
-ql.appendChild(cb);
-[[‘Avito’,‘https://www.avito.ru/rossiya?q=’],[‘Exist’,‘https://exist.ru/search/?q=’],[‘Drom’,‘https://www.drom.ru/catalog/?q=’],[‘Яндекс’,‘https://yandex.ru/search/?text=’]].forEach(function(s){
-ql.appendChild(el(‘a’,{className:‘qlink’,text:s[0],href:s[1]+encodeURIComponent(q),target:’_blank’}));
-});
-qbox.appendChild(ql);
-wrap.appendChild(qbox);
-}
-var del=el(‘button’,{className:‘btndel’,text:‘🗑 Удалить запись’});
-del.addEventListener(‘click’,function(){
-if(!confirm(‘Удалить запись?’))return;
-D.records=D.records.filter(function(r){return r.id!==rec.id;});
-save(D);view=‘car’;render();
-});
-wrap.appendChild(del);
-div.appendChild(wrap);
-return div;
+  var fabrow = mk('div',{cls:'fabrow'});
+  fabrow.appendChild(on(mk('button',{cls:'fab fabg', txt:'\ud83d\udd14 '+T['remind']}), 'click', function(){openModal('rem');}));
+  fabrow.appendChild(on(mk('button',{cls:'fab fabp', txt:'\ud83d\udccb '+T['to-plan']}), 'click', function(){openModal('plan');}));
+  fabrow.appendChild(on(mk('button',{cls:'fab', txt:'+ '+T['nav-record']}), 'click', function(){openModal('rec');}));
+  div.appendChild(fabrow);
+  return div;
 }
 
-// ── MODALS ────────────────────────────────────────────────────────────────────
-var currentModal=null;
-function openModal(type){
-closeModal();
-var ov=el(‘div’,{className:‘overlay’});
-ov.addEventListener(‘click’,function(e){if(e.target===ov)closeModal();});
-var modal=el(‘div’,{className:‘modal’});
-if(type===‘car’)buildCarForm(modal);
-else if(type===‘rec’)buildRecForm(modal);
-else if(type===‘rem’)buildRemForm(modal,1,null);
-else if(type===‘plan’)buildPlanForm(modal);
-ov.appendChild(modal);
-document.body.appendChild(ov);
-currentModal=ov;
-}
-function closeModal(){if(currentModal){currentModal.remove();currentModal=null;}}
-
-function mhdr(modal,title){
-var h=el(‘div’,{className:‘mhdr’});
-h.appendChild(el(‘div’,{className:‘mtitle’,text:title}));
-var x=el(‘button’,{className:‘ibtn’,text:‘✕’});
-x.addEventListener(‘click’,closeModal);
-h.appendChild(x);
-modal.appendChild(h);
-}
-function field(modal,label,inp){
-var f=el(‘div’,{className:‘field’});
-f.appendChild(el(‘label’,{text:label}));
-f.appendChild(inp);
-modal.appendChild(f);
-return inp;
-}
-function inp(type,placeholder,value){
-var i=el(type===‘textarea’?‘textarea’:(type===‘select’?‘select’:‘input’),{className:‘inp’});
-if(type!==‘textarea’&&type!==‘select’)i.type=type||‘text’;
-if(placeholder)i.placeholder=placeholder;
-if(value)i.value=value;
-return i;
-}
-
-function buildCarForm(modal){
-mhdr(modal,‘Новый автомобиль’);
-var selEmoji=‘🚗’;
-var emDiv=el(‘div’,{className:‘field’});
-emDiv.appendChild(el(‘label’,{text:‘Иконка’}));
-var eg=el(‘div’,{className:‘emojis’});
-EMOJIS.forEach(function(e){
-var b=el(‘div’,{className:‘emj ‘+(e===‘🚗’?‘emjon’:’’),text:e});
-b.addEventListener(‘click’,function(){
-document.querySelectorAll(’.emj’).forEach(function(x){x.className=‘emj’;});
-b.className=‘emj emjon’;selEmoji=e;
-});
-eg.appendChild(b);
-});
-emDiv.appendChild(eg);
-modal.appendChild(emDiv);
-var row=el(‘div’,{className:‘row2’});
-var make=inp(‘text’,‘Toyota’);make.className=‘inp’;
-var model=inp(‘text’,‘Camry’);model.className=‘inp’;
-var mf=el(‘div’,{className:‘field’});mf.appendChild(el(‘label’,{text:‘Марка *’}));mf.appendChild(make);row.appendChild(mf);
-var mo=el(‘div’,{className:‘field’});mo.appendChild(el(‘label’,{text:‘Модель *’}));mo.appendChild(model);row.appendChild(mo);
-modal.appendChild(row);
-var row2=el(‘div’,{className:‘row2’});
-var year=inp(‘number’,‘2020’,new Date().getFullYear());year.className=‘inp’;
-var engine=inp(‘text’,‘2.5 2AR-FE’);engine.className=‘inp’;
-var yf=el(‘div’,{className:‘field’});yf.appendChild(el(‘label’,{text:‘Год’}));yf.appendChild(year);row2.appendChild(yf);
-var ef=el(‘div’,{className:‘field’});ef.appendChild(el(‘label’,{text:‘Двигатель’}));ef.appendChild(engine);row2.appendChild(ef);
-modal.appendChild(row2);
-var vin=inp(‘text’,‘JT…’);vin.className=‘inp’;vin.style.fontFamily=‘monospace’;vin.style.letterSpacing=‘1px’;
-field(modal,‘VIN’,vin);
-var mileage=inp(‘number’,‘85000’);mileage.className=‘inp’;
-field(modal,‘Пробег (км)’,mileage);
-var btn=el(‘button’,{className:‘btnok’,text:‘Добавить автомобиль’});
-btn.addEventListener(‘click’,function(){
-if(!make.value.trim()||!model.value.trim()){showToast(‘Укажи марку и модель’);return;}
-D.cars.push({id:uid(),make:make.value.trim(),model:model.value.trim(),year:year.value,engine:engine.value.trim(),vin:vin.value.trim(),mileage:mileage.value,emoji:selEmoji,createdAt:new Date().toISOString()});
-save(D);closeModal();showToast(‘Автомобиль добавлен 🚗’);render();
-});
-modal.appendChild(btn);
+function buildTireWidget(car, lt) {
+  var wrap = mk('div');
+  wrap.appendChild(mk('div',{cls:'sec', txt:'\ud83c\udf21\ufe0f '+T['tire-lbl']}));
+  if (!lt) {
+    var info = mk('div',{cls:'card', css:'font-size:13px;color:var(--m);line-height:1.5;margin-bottom:4px', txt:T['tire-hint']});
+    wrap.appendChild(info); return wrap;
+  }
+  var status = tireStatus(lt, forecastData);
+  var bg = status&&(status.level==='danger'||status.level==='critical')?'rgba(239,68,68,.06)':status&&status.level==='warn'?'rgba(245,158,11,.06)':'var(--s)';
+  var bd = status&&(status.level==='danger'||status.level==='critical')?'rgba(239,68,68,.25)':status&&status.level==='warn'?'rgba(245,158,11,.2)':'var(--b)';
+  var crd = mk('div',{cls:'wcrd', css:'background:'+bg+';border-color:'+bd});
+  var trow = mk('div',{css:'display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:12px'});
+  var tEmoji = lt.tireType==='winter'?'\u2744\ufe0f':lt.tireType==='all-season'?'\ud83d\udd04':'\ud83c\udf1e';
+  trow.appendChild(mk('span',{css:'font-size:22px', txt:tEmoji}));
+  var ti = mk('div',{css:'flex:1'});
+  var tLabel = lt.tireType==='summer'?T['tire-summer']:lt.tireType==='winter'?T['tire-winter']:T['tire-all'];
+  ti.appendChild(mk('div',{css:'font-size:13px;font-weight:600', txt:tLabel}));
+  ti.appendChild(mk('div',{css:'font-size:12px;color:var(--m)', txt:T['installed']+' '+fmtDateShort(lt.date)+(lt.mileage?' \u00b7 '+parseInt(lt.mileage).toLocaleString('ru')+' \u043a\u043c':'')}));
+  trow.appendChild(ti);
+  if (!weatherData) {
+    trow.appendChild(on(mk('button',{cls:'pbtn', css:'font-size:11px;white-space:nowrap', txt:'\ud83d\udccd '+T['weather-btn']}), 'click', fetchWeather));
+  }
+  crd.appendChild(trow);
+  if (weatherData) {
+    var wtop = mk('div',{css:'display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px'});
+    var wl = mk('div');
+    var wrow = mk('div',{css:'display:flex;align-items:center;gap:8px'});
+    wrow.appendChild(mk('span',{css:'font-size:36px', txt:wEmoji(weatherData.weather[0].main)}));
+    var wt = mk('div');
+    wt.appendChild(mk('div',{cls:'wtemp', txt:Math.round(weatherData.main.temp)+'\u00b0'}));
+    wt.appendChild(mk('div',{css:'font-size:13px;color:var(--m);margin-top:3px', txt:weatherData.weather[0].description}));
+    wrow.appendChild(wt); wl.appendChild(wrow);
+    wl.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:6px', txt:'\ud83d\udccd '+weatherData.name+' \u00b7 '+T['weather-city']+' '+Math.round(weatherData.main.feels_like)+'\u00b0'}));
+    wtop.appendChild(wl);
+    wtop.appendChild(on(mk('button',{cls:'pbtn', css:'font-size:11px', txt:'\ud83d\udd04'}), 'click', fetchWeather));
+    crd.appendChild(wtop);
+    if (forecastData&&forecastData.list) {
+      var frow = mk('div',{cls:'frow'});
+      forecastData.list.filter(function(_,i){return i%8===0;}).slice(0,5).forEach(function(d,i){
+        var day = mk('div',{cls:'fday'});
+        var dt = new Date(d.dt*1000);
+        day.appendChild(mk('div',{cls:'fdnm', txt:i===0?T['today']:DAYS[dt.getDay()]}));
+        day.appendChild(mk('div',{css:'font-size:18px', txt:wEmoji(d.weather[0].main)}));
+        day.appendChild(mk('div',{cls:'fdmx', txt:Math.round(d.main.temp_max)+'\u00b0'}));
+        day.appendChild(mk('div',{cls:'fdmn', txt:Math.round(d.main.temp_min)+'\u00b0'}));
+        frow.appendChild(day);
+      });
+      crd.appendChild(frow);
+    }
+  }
+  if (status) {
+    var cls = 'tadvice '+(status.level==='ok'?'tok':status.level==='warn'?'twarn':'tcrit');
+    crd.appendChild(mk('div',{cls:cls, txt:status.msg}));
+  }
+  wrap.appendChild(crd); return wrap;
 }
 
-function buildRecForm(modal){
-var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
-mhdr(modal,‘Новая запись’);
-var selCat=‘maintenance’;
-var catDiv=el(‘div’,{className:‘field’});
-catDiv.appendChild(el(‘label’,{text:‘Категория’}));
-var cg=el(‘div’,{className:‘cats’});
-CATS.forEach(function(c){
-var b=el(‘div’,{className:‘cat ‘+(c.id===‘maintenance’?‘caton’:’’)});
-b.appendChild(el(‘div’,{className:‘cdot’,style:‘background:’+c.color}));
-b.appendChild(document.createTextNode(c.label));
-b.addEventListener(‘click’,function(){
-document.querySelectorAll(’.cat’).forEach(function(x){x.className=‘cat’;});
-b.className=‘cat caton’;selCat=c.id;
-tireRow.style.display=c.id===‘tires’?‘block’:‘none’;
-});
-cg.appendChild(b);
-});
-catDiv.appendChild(cg);
-modal.appendChild(catDiv);
-var tireRow=el(‘div’,{className:‘field’,style:‘display:none’});
-tireRow.appendChild(el(‘label’,{text:‘Тип резины’}));
-var tireSel=el(‘select’,{className:‘inp’});
-[[’’,’— не указано —’],[‘summer’,‘🌞 Летняя’],[‘winter’,‘❄️ Зимняя’],[‘all-season’,‘🔄 Всесезонная’]].forEach(function(o){
-var opt=el(‘option’,{text:o[1]});opt.value=o[0];tireSel.appendChild(opt);
-});
-tireRow.appendChild(tireSel);
-modal.appendChild(tireRow);
-var title=inp(‘text’,‘Замена масла и фильтров’);title.className=‘inp’;field(modal,‘Что сделано *’,title);
-var part=inp(‘text’,‘Фильтр масляный Mann W713/75’);part.className=‘inp’;field(modal,‘Деталь / запчасть’,part);
-var row=el(‘div’,{className:‘row2’});
-var date=inp(‘date’,’’,new Date().toISOString().slice(0,10));date.className=‘inp’;
-var mil=inp(‘number’,‘85000’,car?car.mileage:’’);mil.className=‘inp’;
-var df=el(‘div’,{className:‘field’});df.appendChild(el(‘label’,{text:‘Дата’}));df.appendChild(date);row.appendChild(df);
-var mf=el(‘div’,{className:‘field’});mf.appendChild(el(‘label’,{text:‘Пробег (км)’}));mf.appendChild(mil);row.appendChild(mf);
-modal.appendChild(row);
-var cost=inp(‘number’,‘3500’);cost.className=‘inp’;field(modal,‘Стоимость (₽)’,cost);
-var notes=inp(‘textarea’,‘Использовал масло Shell 5W-40…’);notes.className=‘inp’;field(modal,‘Заметки’,notes);
-var btn=el(‘button’,{className:‘btnok’,text:‘Сохранить запись’});
-btn.addEventListener(‘click’,function(){
-if(!title.value.trim()){showToast(‘Укажи название’);return;}
-D.records.push({id:uid(),carId:selCarId,title:title.value.trim(),category:selCat,tireType:tireSel.value,part:part.value.trim(),date:date.value,mileage:mil.value,cost:cost.value,notes:notes.value.trim(),createdAt:new Date().toISOString()});
-save(D);closeModal();showToast(‘Запись добавлена ✓’);render();
-});
-modal.appendChild(btn);
+function buildRemItem(r) {
+  var pct=remPct(r), color=pColor(pct), days=daysLeft(r);
+  var badge = days!==null?(days<=0?T['overdue']:days+' '+T['rem-days']):(pct>0?Math.min(pct,100)+'%':'');
+  var row = mk('div',{cls:'remi'});
+  row.appendChild(mk('div',{cls:'remico', css:'background:'+color+'18', txt:r.icon||'\ud83d\udd14'}));
+  var rb = mk('div',{cls:'remb'});
+  rb.appendChild(mk('div',{cls:'remttl', txt:r.title}));
+  var meta = (r.intervalKm?T['rem-every-km']+' '+parseInt(r.intervalKm).toLocaleString('ru')+' '+T['rem-km-unit']:'')+
+             (r.intervalKm&&r.intervalMonths?' \u00b7 ':'')+
+             (r.intervalMonths?T['rem-every']+' '+r.intervalMonths+' '+T['rem-months']:'');
+  rb.appendChild(mk('div',{cls:'remmeta', txt:meta}));
+  if (pct > 0) { var pb=mk('div',{cls:'pbar'}); pb.appendChild(mk('div',{cls:'pfill', css:'width:'+Math.min(pct,100)+'%;background:'+color})); rb.appendChild(pb); }
+  row.appendChild(rb);
+  if (badge) row.appendChild(mk('div',{cls:'rbadge', css:'background:'+color+'18;color:'+color, txt:badge}));
+  var del = on(mk('button',{cls:'ibtn', css:'width:32px;height:32px;border-radius:8px;flex-shrink:0', txt:'\u2715'}), 'click', function(){
+    D.reminders=(D.reminders||[]).filter(function(x){return x.id!==r.id;}); save(D); showToast(T['deleted']); render();
+  });
+  row.appendChild(del); return row;
 }
 
-function buildRemForm(modal,step,tmpl){
-modal.innerHTML=’’;
-if(step===1){
-mhdr(modal,‘Тип напоминания’);
-modal.appendChild(el(‘div’,{style:‘font-size:13px;color:var(–m);margin-bottom:14px’,text:‘Что хочешь отслеживать?’}));
-var tg=el(‘div’,{className:‘tmpls’});
-REM_T.forEach(function(t){
-var b=el(‘div’,{className:‘tmpl’});
-b.appendChild(el(‘span’,{style:‘font-size:20px’,text:t.icon}));
-b.appendChild(document.createTextNode(t.label));
-b.addEventListener(‘click’,function(){buildRemForm(modal,2,t);});
-tg.appendChild(b);
-});
-modal.appendChild(tg);
-return;
-}
-var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
-var h=el(‘div’,{className:‘mhdr’});
-var bk=el(‘button’,{className:‘ibtn’,style:‘width:32px;height:32px;border-radius:8px’,text:‘◀’});
-bk.addEventListener(‘click’,function(){buildRemForm(modal,1,null);});
-h.appendChild(bk);
-h.appendChild(el(‘div’,{className:‘mtitle’,text:‘Настройка’}));
-var x=el(‘button’,{className:‘ibtn’,text:‘✕’});x.addEventListener(‘click’,closeModal);h.appendChild(x);
-modal.appendChild(h);
-var title=inp(‘text’,’’,tmpl?tmpl.label:’’);title.className=‘inp’;field(modal,‘Название’,title);
-// interval type
-var itDiv=el(‘div’,{className:‘field’});
-itDiv.appendChild(el(‘label’,{text:‘Интервал’}));
-var irow=el(‘div’,{style:‘display:flex;gap:8px;margin-bottom:12px’});
-var selItype=‘both’;
-var ibtns=[];
-[‘km’,‘date’,‘both’].forEach(function(id,i){
-var b=el(‘button’,{className:‘pbtn ‘+(id===‘both’?‘pbtnon’:’’),text:[‘По пробегу’,‘По дате’,‘Оба’][i]});
-b.addEventListener(‘click’,function(){
-ibtns.forEach(function(x){x.className=‘pbtn’;});b.className=‘pbtn pbtnon’;selItype=id;
-kmRow.style.display=(id===‘km’||id===‘both’)?‘block’:‘none’;
-moRow.style.display=(id===‘date’||id===‘both’)?‘block’:‘none’;
-});
-ibtns.push(b);irow.appendChild(b);
-});
-itDiv.appendChild(irow);
-var kmInp=inp(‘number’,‘Каждые N км (напр. 10000)’,tmpl&&tmpl.km?tmpl.km:’’);kmInp.className=‘inp’;kmInp.style.marginBottom=‘8px’;
-var kmRow=el(‘div’);kmRow.appendChild(kmInp);
-var moInp=inp(‘number’,‘Каждые N месяцев (напр. 6)’,tmpl&&tmpl.mo?tmpl.mo:’’);moInp.className=‘inp’;
-var moRow=el(‘div’);moRow.appendChild(moInp);
-itDiv.appendChild(kmRow);itDiv.appendChild(moRow);
-modal.appendChild(itDiv);
-var row=el(‘div’,{className:‘row2’});
-var ldate=inp(‘date’,’’,new Date().toISOString().slice(0,10));ldate.className=‘inp’;
-var lkm=inp(‘number’,’’,car?car.mileage:’’);lkm.className=‘inp’;
-var df=el(‘div’,{className:‘field’});df.appendChild(el(‘label’,{text:‘Последний раз’}));df.appendChild(ldate);row.appendChild(df);
-var mf=el(‘div’,{className:‘field’});mf.appendChild(el(‘label’,{text:‘Пробег тогда’}));mf.appendChild(lkm);row.appendChild(mf);
-modal.appendChild(row);
-var ckm=inp(‘number’,’’,car?car.mileage:’’);ckm.className=‘inp’;field(modal,‘Текущий пробег (км)’,ckm);
-var btn=el(‘button’,{className:‘btnok’,text:‘Сохранить напоминание’});
-btn.addEventListener(‘click’,function(){
-if(!title.value.trim()){showToast(‘Укажи название’);return;}
-if(!D.reminders)D.reminders=[];
-D.reminders.push({id:uid(),carId:selCarId,title:title.value.trim(),icon:tmpl?tmpl.icon:‘🔔’,intervalType:selItype,intervalKm:kmInp.value,intervalMonths:moInp.value,lastDate:ldate.value,lastKm:lkm.value,currentKm:ckm.value,createdAt:new Date().toISOString()});
-save(D);closeModal();showToast(‘Напоминание добавлено 🔔’);render();
-});
-modal.appendChild(btn);
+function buildPlanItem(p, car) {
+  var pr = {color:PRI_COLOR[p.priority]||'#F59E0B', label:PRI_LABEL[p.priority]||PRI_LABEL.medium};
+  var q = genQ(car, p);
+  var row = mk('div',{cls:'plan'});
+  row.appendChild(mk('div',{cls:'planbar', css:'background:'+pr.color}));
+  var pb = mk('div',{cls:'planb'});
+  var ttl = mk('div',{cls:'planttl', txt:p.title});
+  if (p.part) ttl.appendChild(mk('span',{css:'font-size:12px;color:var(--m);font-weight:400;margin-left:6px', txt:'\u00b7 '+p.part}));
+  pb.appendChild(ttl);
+  var meta = mk('div',{cls:'planmeta'});
+  meta.appendChild(mk('span',{css:'color:'+pr.color+';font-weight:600;font-size:11px', txt:pr.label}));
+  if (p.estimatedCost) meta.appendChild(mk('span',{txt:'\u2248'+parseFloat(p.estimatedCost).toLocaleString('ru')+' \u20BD'}));
+  if (p.deadline) meta.appendChild(mk('span',{txt:'\u043e\u0442 '+new Date(p.deadline).toLocaleDateString('ru',{day:'numeric',month:'short'})}));
+  pb.appendChild(meta);
+  if (p.notes) pb.appendChild(mk('div',{css:'font-size:13px;color:var(--m);line-height:1.5;margin-bottom:8px;padding:8px 10px;background:var(--s2);border-radius:10px', txt:p.notes}));
+  var acts = mk('div',{cls:'planacts'});
+  acts.appendChild(on(mk('button',{cls:'donebtn', txt:'\u2713 '+T['done']}), 'click', function(){
+    D.records.push({id:uid(),carId:p.carId,title:p.title,category:p.category||'repair',part:p.part||'',date:new Date().toISOString().slice(0,10),mileage:'',cost:p.estimatedCost||'',notes:p.notes||'',createdAt:new Date().toISOString()});
+    D.planned=(D.planned||[]).filter(function(x){return x.id!==p.id;}); save(D); showToast(T['done-toast']); render();
+  }));
+  acts.appendChild(mk('a',{cls:'sbtn', txt:'\ud83d\udd0d Exist', href:'https://exist.ru/search/?q='+encodeURIComponent(q), target:'_blank'}));
+  acts.appendChild(mk('a',{cls:'sbtn', txt:'Avito', href:'https://www.avito.ru/rossiya?q='+encodeURIComponent(q), target:'_blank'}));
+  acts.appendChild(on(mk('button',{cls:'sbtn', css:'color:#EF4444;border-color:rgba(239,68,68,.2)', txt:'\ud83d\uddd1'}), 'click', function(){
+    D.planned=(D.planned||[]).filter(function(x){return x.id!==p.id;}); save(D); showToast(T['deleted']); render();
+  }));
+  pb.appendChild(acts); row.appendChild(pb); return row;
 }
 
-function buildPlanForm(modal){
-mhdr(modal,‘📋 Плановый ремонт’);
-modal.appendChild(el(‘div’,{style:‘font-size:13px;color:var(–m);margin-bottom:16px;line-height:1.4’,text:‘Запиши что сервис рекомендовал — это не уйдёт в историю пока не нажмёшь «Сделано»’}));
-var title=inp(‘text’,‘Замена передних тормозных колодок’);title.className=‘inp’;field(modal,‘Что нужно сделать *’,title);
-var part=inp(‘text’,‘Колодки Bosch BP1234’);part.className=‘inp’;field(modal,‘Деталь / запчасть’,part);
-var selPri=‘medium’;
-var priDiv=el(‘div’,{className:‘field’});
-priDiv.appendChild(el(‘label’,{text:‘Приоритет’}));
-var ps=el(‘div’,{className:‘prisel’});
-var pbtns=[];
-[[‘high’,‘🔴 Срочно’,‘prih’],[‘medium’,‘🟡 Скоро’,‘prim’],[‘low’,‘🟢 Не горит’,‘pril’]].forEach(function(p){
-var b=el(‘button’,{className:‘pribtn ‘+(p[0]===‘medium’?p[2]:’’),text:p[1]});
-b.addEventListener(‘click’,function(){
-pbtns.forEach(function(x){x.className=‘pribtn’;});b.className=‘pribtn ‘+p[2];selPri=p[0];
-});
-pbtns.push(b);ps.appendChild(b);
-});
-priDiv.appendChild(ps);modal.appendChild(priDiv);
-var row=el(‘div’,{className:‘row2’});
-var cost=inp(‘number’,‘5000’);cost.className=‘inp’;
-var dead=inp(‘date’,’’);dead.className=‘inp’;
-var cf=el(‘div’,{className:‘field’});cf.appendChild(el(‘label’,{text:‘Примерная стоимость’}));cf.appendChild(cost);row.appendChild(cf);
-var df=el(‘div’,{className:‘field’});df.appendChild(el(‘label’,{text:‘Сделать до’}));df.appendChild(dead);row.appendChild(df);
-modal.appendChild(row);
-var notes=inp(‘textarea’,‘Сервис сказал что колодки в критическом состоянии…’);notes.className=‘inp’;field(modal,‘Заметки’,notes);
-var btn=el(‘button’,{className:‘btnok’,text:‘Добавить в план’});
-btn.addEventListener(‘click’,function(){
-if(!title.value.trim()){showToast(‘Укажи название’);return;}
-if(!D.planned)D.planned=[];
-D.planned.push({id:uid(),carId:selCarId,title:title.value.trim(),part:part.value.trim(),priority:selPri,estimatedCost:cost.value,deadline:dead.value,notes:notes.value.trim(),category:‘repair’,createdAt:new Date().toISOString()});
-save(D);closeModal();showToast(‘Добавлено в план 📋’);render();
-});
-modal.appendChild(btn);
+function buildRecord() {
+  var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
+  var rec=D.records.filter(function(r){return r.id===selRecId;})[0];
+  if (!car||!rec) { view='car'; return buildCar(); }
+  var cat=catById(rec.category), q=genQ(car,rec);
+  var div=mk('div');
+  var hdr=mk('div',{cls:'hdr'});
+  hdr.appendChild(on(mk('button',{cls:'ibtn',txt:'\u25c4'}),'click',function(){view='car';render();}));
+  hdr.appendChild(mk('div',{css:'font-family:var(--fd);font-size:15px;font-weight:600',txt:T['nav-record']}));
+  hdr.appendChild(mk('div',{css:'width:42px'}));
+  div.appendChild(hdr);
+  var wrap=mk('div',{cls:'wrap'});
+  var card=mk('div',{cls:'card',css:'margin-bottom:14px'});
+  var top=mk('div',{css:'display:flex;gap:12px;align-items:flex-start;margin-bottom:16px'});
+  top.appendChild(mk('div',{css:'width:44px;height:44px;border-radius:12px;background:'+cat.color+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px',txt:'\ud83d\udd27'}));
+  var ti=mk('div');
+  ti.appendChild(mk('div',{css:'font-family:var(--fd);font-size:18px;font-weight:700',txt:rec.title}));
+  if (rec.tireType) { var tl2=rec.tireType==='summer'?T['tire-summer']:rec.tireType==='winter'?T['tire-winter']:T['tire-all']; ti.appendChild(mk('div',{css:'font-size:13px;color:#10B981;margin-top:4px',txt:tl2})); }
+  ti.appendChild(mk('span',{cls:'pill',css:'background:'+cat.color+'22;color:'+cat.color+';margin-top:6px;display:inline-flex',txt:cat.ru}));
+  top.appendChild(ti); card.appendChild(top);
+  var grid=mk('div',{css:'display:grid;grid-template-columns:1fr 1fr;gap:10px'});
+  [[T['date-lbl'],fmtDate(rec.date)],[T['mileage-f'],rec.mileage?fmtNum(rec.mileage)+' \u043a\u043c':'\u2014'],[T['cost-lbl'],fmtMoney(rec.cost)],[T['part-f'],rec.part||'\u2014']].forEach(function(s){
+    var st=mk('div',{cls:'stat'}); st.appendChild(mk('div',{cls:'statk',txt:s[0]})); st.appendChild(mk('div',{css:'font-family:var(--fd);font-weight:600;font-size:13px;margin-top:4px',txt:s[1]})); grid.appendChild(st);
+  });
+  card.appendChild(grid);
+  if (rec.notes) card.appendChild(mk('div',{css:'margin-top:14px;padding:14px;background:var(--s2);border-radius:12px;font-size:14px;line-height:1.5;color:var(--m)',txt:rec.notes}));
+  wrap.appendChild(card);
+  if (rec.category !== 'fuel') {
+    var qbox=mk('div',{cls:'qbox'});
+    qbox.appendChild(mk('div',{cls:'qlbl',txt:T['search-lbl']}));
+    qbox.appendChild(mk('div',{cls:'qtxt',txt:q}));
+    var ql=mk('div',{cls:'qlinks'});
+    ql.appendChild(on(mk('button',{cls:'copybtn',txt:T['copy-btn']}),'click',function(){navigator.clipboard.writeText(q).then(function(){showToast(T['copied']);});}));
+    [['Avito','https://www.avito.ru/rossiya?q='],['Exist','https://exist.ru/search/?q='],['Drom','https://www.drom.ru/catalog/?q='],['Yandex','https://yandex.ru/search/?text=']].forEach(function(s){
+      ql.appendChild(mk('a',{cls:'qlink',txt:s[0],href:s[1]+encodeURIComponent(q),target:'_blank'}));
+    });
+    qbox.appendChild(ql); wrap.appendChild(qbox);
+  }
+  wrap.appendChild(on(mk('button',{cls:'btndel',txt:'\ud83d\uddd1 '+T['del-rec']}),'click',function(){
+    if (!confirm(T['del-confirm-rec'])) return;
+    D.records=D.records.filter(function(r){return r.id!==rec.id;}); save(D); view='car'; render();
+  }));
+  div.appendChild(wrap); return div;
 }
 
-function fetchWeather(){
-if(!navigator.geolocation){showToast(‘Геолокация не поддерживается’);return;}
-showToast(‘Определяем местоположение…’);
-navigator.geolocation.getCurrentPosition(function(pos){
-var K=‘bd5e378503939ddaee76f12ad7a97608’;
-var lat=pos.coords.latitude,lon=pos.coords.longitude;
-Promise.all([
-fetch(‘https://api.openweathermap.org/data/2.5/weather?lat=’+lat+’&lon=’+lon+’&units=metric&lang=ru&appid=’+K),
-fetch(‘https://api.openweathermap.org/data/2.5/forecast?lat=’+lat+’&lon=’+lon+’&units=metric&lang=ru&appid=’+K)
-]).then(function(rs){
-return Promise.all(rs.map(function(r){return r.json();}));
-}).then(function(data){
-if(data[0].cod!==200)throw new Error(‘Weather error’);
-weatherData=data[0];forecastData=data[1];
-showToast(‘Погода загружена ✓’);render();
-}).catch(function(){showToast(‘Ошибка загрузки погоды’);});
-},function(){showToast(‘Нет доступа к геолокации’);});
+// MODALS
+var currentModal = null;
+function openModal(type) {
+  closeModal();
+  var ov = on(mk('div',{cls:'overlay'}),'click',function(e){if(e.target===ov)closeModal();});
+  var modal = mk('div',{cls:'modal'});
+  if (type==='car') buildCarForm(modal);
+  else if (type==='rec') buildRecForm(modal);
+  else if (type==='rem') buildRemForm(modal,1,null);
+  else if (type==='plan') buildPlanForm(modal);
+  ov.appendChild(modal); document.body.appendChild(ov); currentModal=ov;
+}
+function closeModal() { if (currentModal) { currentModal.remove(); currentModal=null; } }
+
+function mHdr(modal, title, showBack, backFn) {
+  var h=mk('div',{cls:'mhdr'});
+  var left=mk('div',{css:'display:flex;align-items:center;gap:10px'});
+  if (showBack) left.appendChild(on(mk('button',{cls:'ibtn',css:'width:32px;height:32px;border-radius:8px',txt:'\u25c4'}),'click',backFn));
+  left.appendChild(mk('div',{cls:'mtitle',txt:title}));
+  h.appendChild(left);
+  h.appendChild(on(mk('button',{cls:'ibtn',txt:'\u2715'}),'click',closeModal));
+  modal.appendChild(h);
+}
+function addField(modal, label, input) {
+  var f=mk('div',{cls:'field'}); f.appendChild(mk('label',{txt:label})); f.appendChild(input); modal.appendChild(f); return input;
+}
+function mkInp(type, ph, val) {
+  var i = mk(type==='textarea'?'textarea':(type==='select'?'select':'input'),{cls:'inp'});
+  if (type!=='textarea'&&type!=='select') i.type=type||'text';
+  if (ph) i.placeholder=ph;
+  if (val!==undefined&&val!==null) i.value=val;
+  return i;
+}
+
+function buildCarForm(modal) {
+  mHdr(modal, T['new-car'], false, null);
+  var selEmoji = EMOJIS[0];
+  var emDiv=mk('div',{cls:'field'}); emDiv.appendChild(mk('label',{txt:T['icon-lbl']}));
+  var eg=mk('div',{cls:'emojis'});
+  EMOJIS.forEach(function(e,idx) {
+    var b=mk('div',{cls:'emj '+(idx===0?'emjon':''), txt:e});
+    on(b,'click',function(){ document.querySelectorAll('.emj').forEach(function(x){x.className='emj';}); b.className='emj emjon'; selEmoji=e; });
+    eg.appendChild(b);
+  });
+  emDiv.appendChild(eg); modal.appendChild(emDiv);
+  var row=mk('div',{cls:'row2'});
+  var make=mkInp('text','Toyota'); var mf=mk('div',{cls:'field'}); mf.appendChild(mk('label',{txt:T['make-lbl']+' *'})); mf.appendChild(make); row.appendChild(mf);
+  var model=mkInp('text','Camry'); var mof=mk('div',{cls:'field'}); mof.appendChild(mk('label',{txt:T['model-lbl']+' *'})); mof.appendChild(model); row.appendChild(mof);
+  modal.appendChild(row);
+  var row2=mk('div',{cls:'row2'});
+  var year=mkInp('number','2020',new Date().getFullYear()); var yf=mk('div',{cls:'field'}); yf.appendChild(mk('label',{txt:T['year-lbl']})); yf.appendChild(year); row2.appendChild(yf);
+  var engine=mkInp('text','2.5 2AR-FE'); var ef=mk('div',{cls:'field'}); ef.appendChild(mk('label',{txt:T['engine-lbl']})); ef.appendChild(engine); row2.appendChild(ef);
+  modal.appendChild(row2);
+  var vin=mkInp('text','JT...'); vin.style.fontFamily='monospace'; vin.style.letterSpacing='1px'; addField(modal,T['vin-lbl'],vin);
+  var mil=mkInp('number','85000'); addField(modal,T['mil-lbl'],mil);
+  on(addField(modal,'',mk('button',{cls:'btnok',txt:T['add-car-btn']})),'click',function(){
+    if (!make.value.trim()||!model.value.trim()) { showToast(T['need-make']); return; }
+    D.cars.push({id:uid(),make:make.value.trim(),model:model.value.trim(),year:year.value,engine:engine.value.trim(),vin:vin.value.trim(),mileage:mil.value,emoji:selEmoji,createdAt:new Date().toISOString()});
+    save(D); closeModal(); showToast(T['added-car']); render();
+  });
+}
+
+function buildRecForm(modal) {
+  var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
+  mHdr(modal, T['new-record'], false, null);
+  var selCat='maintenance';
+  var catDiv=mk('div',{cls:'field'}); catDiv.appendChild(mk('label',{txt:T['category-lbl']}));
+  var cg=mk('div',{cls:'cats'});
+  var tireRow=mk('div',{cls:'field',css:'display:none'});
+  CATS.forEach(function(c) {
+    var b=mk('div',{cls:'cat '+(c.id==='maintenance'?'caton':'')}); b.appendChild(mk('div',{cls:'cdot',css:'background:'+c.color})); b.appendChild(document.createTextNode(c.ru));
+    on(b,'click',function(){ document.querySelectorAll('.cat').forEach(function(x){x.className='cat';}); b.className='cat caton'; selCat=c.id; tireRow.style.display=c.id==='tires'?'block':'none'; });
+    cg.appendChild(b);
+  });
+  catDiv.appendChild(cg); modal.appendChild(catDiv);
+  tireRow.appendChild(mk('label',{txt:T['tire-type']}));
+  var tireSel=mk('select',{cls:'inp'});
+  [['',' - '+T['tire-type']+' - '],['summer',T['tire-summer']],['winter',T['tire-winter']],['all-season',T['tire-all']]].forEach(function(o){var opt=mk('option',{txt:o[1]});opt.value=o[0];tireSel.appendChild(opt);});
+  tireRow.appendChild(tireSel); modal.appendChild(tireRow);
+  var title=mkInp('text',''); addField(modal,T['what-done']+' *',title);
+  var part=mkInp('text',''); addField(modal,T['detail'],part);
+  var row=mk('div',{cls:'row2'});
+  var date=mkInp('date','',new Date().toISOString().slice(0,10)); var df=mk('div',{cls:'field'}); df.appendChild(mk('label',{txt:T['date-inp']})); df.appendChild(date); row.appendChild(df);
+  var mili=mkInp('number','85000',car?car.mileage:''); var mf=mk('div',{cls:'field'}); mf.appendChild(mk('label',{txt:T['mil-inp']})); mf.appendChild(mili); row.appendChild(mf);
+  modal.appendChild(row);
+  var cost=mkInp('number',''); addField(modal,T['cost-inp'],cost);
+  var notes=mkInp('textarea',''); addField(modal,T['notes-inp'],notes);
+  on(addField(modal,'',mk('button',{cls:'btnok',txt:T['save-record']})),'click',function(){
+    if (!title.value.trim()) { showToast(T['need-name']); return; }
+    D.records.push({id:uid(),carId:selCarId,title:title.value.trim(),category:selCat,tireType:tireSel.value,part:part.value.trim(),date:date.value,mileage:mili.value,cost:cost.value,notes:notes.value.trim(),createdAt:new Date().toISOString()});
+    save(D); closeModal(); showToast(T['added-rec']); render();
+  });
+}
+
+function buildRemForm(modal, step, tmpl) {
+  modal.innerHTML='';
+  if (step===1) {
+    mHdr(modal,T['rem-title'],false,null);
+    modal.appendChild(mk('div',{css:'font-size:13px;color:var(--m);margin-bottom:14px',txt:T['rem-what']}));
+    var tg=mk('div',{cls:'tmpls'});
+    REM_LABELS.forEach(function(lbl,idx){
+      var b=mk('div',{cls:'tmpl'}); b.appendChild(mk('span',{css:'font-size:20px',txt:REM_ICONS[idx]})); b.appendChild(document.createTextNode(lbl));
+      on(b,'click',function(){buildRemForm(modal,2,{icon:REM_ICONS[idx],label:lbl,km:REM_KM[idx],mo:REM_MO[idx]});});
+      tg.appendChild(b);
+    });
+    modal.appendChild(tg); return;
+  }
+  var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
+  mHdr(modal,T['rem-setup'],true,function(){buildRemForm(modal,1,null);});
+  var title=mkInp('text','',tmpl?tmpl.label:''); addField(modal,T['rem-name'],title);
+  var iDiv=mk('div',{cls:'field'}); iDiv.appendChild(mk('label',{txt:T['rem-interval']}));
+  var irow=mk('div',{css:'display:flex;gap:8px;margin-bottom:12px'});
+  var selItype='both'; var ibtns=[];
+  [['km',T['rem-bykm']],['date',T['rem-bydate']],['both',T['rem-both']]].forEach(function(it){
+    var b=mk('button',{cls:'pbtn '+(it[0]==='both'?'pbtnon':''),txt:it[1]});
+    on(b,'click',function(){ ibtns.forEach(function(x){x.className='pbtn';}); b.className='pbtn pbtnon'; selItype=it[0]; kmRow.style.display=(it[0]==='km'||it[0]==='both')?'block':'none'; moRow.style.display=(it[0]==='date'||it[0]==='both')?'block':'none'; });
+    ibtns.push(b); irow.appendChild(b);
+  });
+  iDiv.appendChild(irow);
+  var kmInp=mkInp('number',T['rem-kmhint'],tmpl&&tmpl.km?tmpl.km:''); kmInp.style.marginBottom='8px';
+  var kmRow=mk('div'); kmRow.appendChild(kmInp);
+  var moInp=mkInp('number',T['rem-mohint'],tmpl&&tmpl.mo?tmpl.mo:'');
+  var moRow=mk('div'); moRow.appendChild(moInp);
+  iDiv.appendChild(kmRow); iDiv.appendChild(moRow); modal.appendChild(iDiv);
+  var row=mk('div',{cls:'row2'});
+  var ldate=mkInp('date','',new Date().toISOString().slice(0,10)); var df=mk('div',{cls:'field'}); df.appendChild(mk('label',{txt:T['rem-last']})); df.appendChild(ldate); row.appendChild(df);
+  var lkm=mkInp('number','',car?car.mileage:''); var mf=mk('div',{cls:'field'}); mf.appendChild(mk('label',{txt:T['rem-lastkm']})); mf.appendChild(lkm); row.appendChild(mf);
+  modal.appendChild(row);
+  var ckm=mkInp('number','',car?car.mileage:''); addField(modal,T['rem-cur'],ckm);
+  on(addField(modal,'',mk('button',{cls:'btnok',txt:T['rem-save']})),'click',function(){
+    if (!title.value.trim()) { showToast(T['need-name']); return; }
+    if (!D.reminders) D.reminders=[];
+    D.reminders.push({id:uid(),carId:selCarId,title:title.value.trim(),icon:tmpl?tmpl.icon:'\ud83d\udd14',intervalType:selItype,intervalKm:kmInp.value,intervalMonths:moInp.value,lastDate:ldate.value,lastKm:lkm.value,currentKm:ckm.value,createdAt:new Date().toISOString()});
+    save(D); closeModal(); showToast(T['added-rem']); render();
+  });
+}
+
+function buildPlanForm(modal) {
+  mHdr(modal,'\ud83d\udccb '+T['plan-modal'],false,null);
+  modal.appendChild(mk('div',{css:'font-size:13px;color:var(--m);margin-bottom:16px;line-height:1.4',txt:T['plan-hint']}));
+  var title=mkInp('text',''); addField(modal,T['plan-what']+' *',title);
+  var part=mkInp('text',''); addField(modal,T['plan-part'],part);
+  var priDiv=mk('div',{cls:'field'}); priDiv.appendChild(mk('label',{txt:T['plan-priority']}));
+  var ps=mk('div',{cls:'prisel'}); var selPri='medium'; var pbtns=[];
+  [['high',T['plan-urgent'],'prih'],['medium',T['plan-soon'],'prim'],['low',T['plan-low'],'pril']].forEach(function(p){
+    var b=mk('button',{cls:'pribtn '+(p[0]==='medium'?p[2]:''),txt:p[1]});
+    on(b,'click',function(){ pbtns.forEach(function(x){x.className='pribtn';}); b.className='pribtn '+p[2]; selPri=p[0]; });
+    pbtns.push(b); ps.appendChild(b);
+  });
+  priDiv.appendChild(ps); modal.appendChild(priDiv);
+  var row=mk('div',{cls:'row2'});
+  var cost=mkInp('number',''); var cf=mk('div',{cls:'field'}); cf.appendChild(mk('label',{txt:T['plan-cost']})); cf.appendChild(cost); row.appendChild(cf);
+  var dead=mkInp('date',''); var df=mk('div',{cls:'field'}); df.appendChild(mk('label',{txt:T['plan-deadline']})); df.appendChild(dead); row.appendChild(df);
+  modal.appendChild(row);
+  var notes=mkInp('textarea',''); addField(modal,T['plan-notes'],notes);
+  on(addField(modal,'',mk('button',{cls:'btnok',txt:T['plan-add']})),'click',function(){
+    if (!title.value.trim()) { showToast(T['need-name']); return; }
+    if (!D.planned) D.planned=[];
+    D.planned.push({id:uid(),carId:selCarId,title:title.value.trim(),part:part.value.trim(),priority:selPri,estimatedCost:cost.value,deadline:dead.value,notes:notes.value.trim(),category:'repair',createdAt:new Date().toISOString()});
+    save(D); closeModal(); showToast(T['added-plan']); render();
+  });
+}
+
+function fetchWeather() {
+  if (!navigator.geolocation) { showToast(T['geo-unsupported']); return; }
+  showToast(T['geo-detecting']);
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var K='bd5e378503939ddaee76f12ad7a97608';
+    var lat=pos.coords.latitude, lon=pos.coords.longitude;
+    Promise.all([
+      fetch('https://api.openweathermap.org/data/2.5/weather?lat='+lat+'&lon='+lon+'&units=metric&lang=ru&appid='+K),
+      fetch('https://api.openweathermap.org/data/2.5/forecast?lat='+lat+'&lon='+lon+'&units=metric&lang=ru&appid='+K)
+    ]).then(function(rs){ return Promise.all(rs.map(function(r){return r.json();})); })
+    .then(function(data){
+      if (data[0].cod!==200) throw new Error('err');
+      weatherData=data[0]; forecastData=data[1]; showToast(T['weather-loaded']); render();
+    }).catch(function(){ showToast(T['weather-fail']); });
+  }, function(){ showToast(T['weather-err']); });
 }
 
 render();
