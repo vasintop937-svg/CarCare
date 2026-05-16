@@ -135,6 +135,28 @@ select.inp option{background:var(--s2)}
 .user-bar{display:flex;align-items:center;gap:8px}
 .user-email{font-size:11px;color:var(–m);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .signout-btn{padding:6px 12px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(–b);background:var(–s2);color:var(–m)}
+
+/* Dashboard */
+.dash-card{background:var(–s);border:1px solid var(–b);border-radius:16px;padding:20px;margin-bottom:12px}
+.dash-title{font-family:var(–fd);font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.dash-total{font-family:var(–fd);font-size:32px;font-weight:800;color:var(–a);margin-bottom:4px}
+.dash-sub{font-size:13px;color:var(–m)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:13px;width:120px;flex-shrink:0;color:var(–t)}
+.bar-wrap{flex:1;height:8px;background:var(–s2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.bar-val{font-size:12px;font-family:var(–fd);font-weight:600;width:70px;text-align:right;flex-shrink:0}
+.month-chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-bottom:8px}
+.month-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.month-bar{width:100%;border-radius:6px 6px 0 0;min-height:4px;transition:all .3s}
+.month-bar:hover{opacity:.8}
+.month-name{font-size:9px;color:var(–m);text-align:center}
+.month-val{font-size:9px;font-family:var(–fd);font-weight:600;color:var(–m);text-align:center}
+.big-num{font-family:var(–fd);font-size:22px;font-weight:800}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(–s2);border-radius:12px;padding:14px;border:1px solid var(–b)}
+.kpi-val{font-family:var(–fd);font-size:20px;font-weight:800;margin-bottom:2px}
+.kpi-lbl{font-size:11px;color:var(–m)}
 </style>
 
 <!-- All Russian text stored as data to avoid encoding issues -->
@@ -589,6 +611,7 @@ function render() {
   else if (view==='car') app.appendChild(buildCar());
   else if (view==='record') app.appendChild(buildRecord());
   else if (view==='history') app.appendChild(buildHistory());
+  else if (view==='dashboard') app.appendChild(buildDashboard());
 }
 
 function buildHome() {
@@ -683,7 +706,10 @@ function buildCar() {
   [[recs.length,T['records']],[cSpent(car.id).toLocaleString('ru')+' \u20BD',T['spent']],[(car.mileage?parseInt(car.mileage).toLocaleString('ru')+' \u043a\u043c':'\u2014'),T['mileage-lbl']]].forEach(function(s){
     var st=mk('div',{cls:'stat'}); st.appendChild(mk('div',{cls:'statv',css:'font-size:14px',txt:''+s[0]})); st.appendChild(mk('div',{cls:'statk',txt:s[1]})); sts.appendChild(st);
   });
-  hero.appendChild(sts); wrap.appendChild(hero);
+  hero.appendChild(sts);
+  var dashBtn = on(mk('button',{css:'width:100%;margin-top:12px;padding:10px;border:1px solid rgba(200,255,0,.2);border-radius:12px;background:rgba(200,255,0,.06);color:var(--a);font-family:var(--fd);font-size:13px;font-weight:600;cursor:pointer',txt:'\ud83d\udcca \u0414\u0430\u0448\u0431\u043e\u0440\u0434 \u0440\u0430\u0441\u0445\u043e\u0434\u043e\u0432'}), 'click', function(){ view='dashboard'; render(); });
+  hero.appendChild(dashBtn);
+  wrap.appendChild(hero);
 
   // tire widget
   wrap.appendChild(buildTireWidget(car,lt));
@@ -816,6 +842,148 @@ function buildHistory() {
     wrap.appendChild(total);
   }
   div.appendChild(wrap); return div;
+}
+
+function buildDashboard() {
+  var car = D.cars.filter(function(c){return c.id===selCarId;})[0];
+  if (!car) { view='car'; return buildCar(); }
+  var recs = cRecs(car.id).filter(function(r){ return parseFloat(r.cost)>0; });
+
+  var div = mk('div');
+  var hdr = mk('div',{cls:'hdr'});
+  hdr.appendChild(on(mk('button',{cls:'ibtn',txt:'\u25c4'}),'click',function(){view='car';render();}));
+  hdr.appendChild(mk('div',{css:'font-family:var(--fd);font-size:15px;font-weight:600',txt:'\ud83d\udcca \u0414\u0430\u0448\u0431\u043e\u0440\u0434'}));
+  hdr.appendChild(mk('div',{css:'width:42px'}));
+  div.appendChild(hdr);
+
+  var wrap = mk('div',{cls:'wrap'});
+  var now = new Date();
+  var thisYear = now.getFullYear();
+  var thisMonth = now.getMonth();
+
+  // Total spent
+  var totalAll = recs.reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);
+  var totalYear = recs.filter(function(r){return new Date(r.date).getFullYear()===thisYear;}).reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);
+  var totalMonth = recs.filter(function(r){var d=new Date(r.date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);
+
+  // KPI card
+  var kpiCard = mk('div',{cls:'dash-card'});
+  kpiCard.appendChild(mk('div',{cls:'dash-title',txt:'\u041e\u0431\u0449\u0430\u044f \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430'}));
+  var kpiGrid = mk('div',{cls:'kpi-grid'});
+  [
+    [totalAll.toLocaleString('ru')+' \u20BD','\u0412\u0441\u0435\u0433\u043e \u043f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e','var(--a)'],
+    [totalYear.toLocaleString('ru')+' \u20BD','\u0412 '+thisYear+' \u0433\u043e\u0434\u0443','#3B82F6'],
+    [totalMonth.toLocaleString('ru')+' \u20BD','\u0412 \u044d\u0442\u043e\u043c \u043c\u0435\u0441\u044f\u0446\u0435','#10B981'],
+    [recs.length+' \u0448\u0442.','\u0417\u0430\u043f\u0438\u0441\u0435\u0439 \u0432\u0441\u0435\u0433\u043e','#8B5CF6']
+  ].forEach(function(k){
+    var kpi=mk('div',{cls:'kpi'});
+    kpi.appendChild(mk('div',{cls:'kpi-val',css:'color:'+k[2],txt:k[0]}));
+    kpi.appendChild(mk('div',{cls:'kpi-lbl',txt:k[1]}));
+    kpiGrid.appendChild(kpi);
+  });
+  kpiCard.appendChild(kpiGrid);
+  wrap.appendChild(kpiCard);
+
+  // Monthly chart - last 12 months
+  var monthCard = mk('div',{cls:'dash-card'});
+  monthCard.appendChild(mk('div',{cls:'dash-title',txt:'\u0420\u0430\u0441\u0445\u043e\u0434\u044b \u043f\u043e \u043c\u0435\u0441\u044f\u0446\u0430\u043c'}));
+  var months = [];
+  for (var i=11;i>=0;i--) {
+    var d = new Date(thisYear, thisMonth-i, 1);
+    months.push({year:d.getFullYear(),month:d.getMonth(),label:d.toLocaleDateString('ru',{month:'short'})});
+  }
+  var monthTotals = months.map(function(m){
+    return recs.filter(function(r){var d=new Date(r.date);return d.getFullYear()===m.year&&d.getMonth()===m.month;}).reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);
+  });
+  var maxMonth = Math.max.apply(null,monthTotals)||1;
+
+  var chart = mk('div',{cls:'month-chart'});
+  months.forEach(function(m,i){
+    var pct = (monthTotals[i]/maxMonth)*100;
+    var isNow = m.year===thisYear&&m.month===thisMonth;
+    var col = mk('div',{cls:'month-col'});
+    var bar = mk('div',{cls:'month-bar',css:'height:'+Math.max(pct,2)+'%;background:'+(isNow?'var(--a)':'#3B82F6')+(isNow?';box-shadow:0 0 8px rgba(200,255,0,.3)':'')});
+    col.appendChild(bar);
+    col.appendChild(mk('div',{cls:'month-name',txt:m.label}));
+    if (monthTotals[i]>0) col.appendChild(mk('div',{cls:'month-val',css:'color:'+(isNow?'var(--a)':'var(--m)'),txt:(monthTotals[i]/1000).toFixed(1)+'k'}));
+    chart.appendChild(col);
+  });
+  monthCard.appendChild(chart);
+
+  // Best/worst months
+  var nonZero = monthTotals.filter(function(v){return v>0;});
+  if (nonZero.length>0) {
+    var maxVal = Math.max.apply(null,nonZero);
+    var maxIdx = monthTotals.indexOf(maxVal);
+    var avgMonth = nonZero.reduce(function(a,b){return a+b;},0)/nonZero.length;
+    var row2 = mk('div',{css:'display:flex;gap:10px;margin-top:4px'});
+    [['\ud83d\udd25 \u0421\u0430\u043c\u044b\u0439 \u0434\u043e\u0440\u043e\u0433\u043e\u0439', months[maxIdx].label+': '+maxVal.toLocaleString('ru')+' \u20BD','#EF4444'],
+     ['\u2300 \u0421\u0440\u0435\u0434\u043d\u0435\u0435 \u0432 \u043c\u0435\u0441\u044f\u0446',Math.round(avgMonth).toLocaleString('ru')+' \u20BD','#F59E0B']].forEach(function(s){
+      var b=mk('div',{css:'flex:1;background:var(--s2);border-radius:12px;padding:12px;border:1px solid var(--b)'});
+      b.appendChild(mk('div',{css:'font-size:11px;color:var(--m);margin-bottom:4px',txt:s[0]}));
+      b.appendChild(mk('div',{css:'font-family:var(--fd);font-size:15px;font-weight:700;color:'+s[2],txt:s[1]}));
+      row2.appendChild(b);
+    });
+    monthCard.appendChild(row2);
+  }
+  wrap.appendChild(monthCard);
+
+  // By category
+  var catCard = mk('div',{cls:'dash-card'});
+  catCard.appendChild(mk('div',{cls:'dash-title',txt:'\u0420\u0430\u0437\u0431\u0438\u0432\u043a\u0430 \u043f\u043e \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f\u043c'}));
+  var catTotals = {};
+  recs.forEach(function(r){
+    var c=r.category||'other';
+    catTotals[c]=(catTotals[c]||0)+(parseFloat(r.cost)||0);
+  });
+  var catSorted = Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];});
+  var maxCat = catTotals[catSorted[0]]||1;
+  catSorted.forEach(function(cid){
+    var cat=catById(cid), val=catTotals[cid], pct=(val/totalAll)*100;
+    var row=mk('div',{cls:'bar-row'});
+    row.appendChild(mk('div',{cls:'bar-label',txt:cat.ru}));
+    var bw=mk('div',{cls:'bar-wrap'});
+    bw.appendChild(mk('div',{cls:'bar-fill',css:'width:'+((val/maxCat)*100)+'%;background:'+cat.color}));
+    row.appendChild(bw);
+    row.appendChild(mk('div',{cls:'bar-val',css:'color:'+cat.color,txt:val.toLocaleString('ru')+' \u20BD'}));
+    catCard.appendChild(row);
+    // percent
+    var pRow=mk('div',{css:'display:flex;justify-content:flex-end;margin-top:-8px;margin-bottom:8px'});
+    pRow.appendChild(mk('div',{css:'font-size:10px;color:var(--m)',txt:pct.toFixed(1)+'%'}));
+    catCard.appendChild(pRow);
+  });
+  wrap.appendChild(catCard);
+
+  // Fuel stats
+  var fuelRecs = cRecs(car.id).filter(function(r){return r.category==='fuel'&&r.liters&&r.mileage;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  if (fuelRecs.length>=2) {
+    var fuelCard = mk('div',{cls:'dash-card'});
+    fuelCard.appendChild(mk('div',{cls:'dash-title',txt:'\u26fd \u0422\u043e\u043f\u043b\u0438\u0432\u043e'}));
+    var consumptions=[];
+    for(var fi=1;fi<fuelRecs.length;fi++){
+      var kmDiff=parseFloat(fuelRecs[fi].mileage)-parseFloat(fuelRecs[fi-1].mileage);
+      var liters=parseFloat(fuelRecs[fi].liters);
+      if(kmDiff>0&&liters>0) consumptions.push((liters/kmDiff)*100);
+    }
+    if(consumptions.length>0){
+      var avgCons=consumptions.reduce(function(a,b){return a+b;},0)/consumptions.length;
+      var totalLiters=fuelRecs.reduce(function(s,r){return s+(parseFloat(r.liters)||0);},0);
+      var totalFuelCost=fuelRecs.reduce(function(s,r){return s+(parseFloat(r.cost)||0);},0);
+      var fg=mk('div',{cls:'kpi-grid'});
+      [[avgCons.toFixed(1)+' \u043b/100\u043a\u043c','\u0421\u0440\u0435\u0434\u043d\u0438\u0439 \u0440\u0430\u0441\u0445\u043e\u0434','#F59E0B'],
+       [totalLiters.toFixed(0)+' \u043b','\u0412\u0441\u0435\u0433\u043e \u0437\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e','#10B981'],
+       [fuelRecs.length+' \u0437\u0430\u043f\u0440.','\u0417\u0430\u043f\u0440\u0430\u0432\u043e\u043a','#3B82F6'],
+       [totalFuelCost.toLocaleString('ru')+' \u20BD','\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e \u043d\u0430 \u0442\u043e\u043f\u043b\u0438\u0432\u043e','#EF4444']
+      ].forEach(function(k){
+        var kpi=mk('div',{cls:'kpi'}); kpi.appendChild(mk('div',{cls:'kpi-val',css:'color:'+k[2],txt:k[0]})); kpi.appendChild(mk('div',{cls:'kpi-lbl',txt:k[1]})); fg.appendChild(kpi);
+      });
+      fuelCard.appendChild(fg);
+      wrap.appendChild(fuelCard);
+    }
+  }
+
+  div.appendChild(wrap);
+  return div;
 }
 
 function buildTireWidget(car, lt) {
