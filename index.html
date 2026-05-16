@@ -323,18 +323,20 @@ function save(d) {
 
 function loadFromCloud(callback) {
   var doc = getUserDoc();
-  if (!doc) { callback(load()); return; }
+  if (!doc) { callback({cars:[],records:[],reminders:[],planned:[],stations:[]}); return; }
   showSync();
   doc.get().then(function(snap) {
     hideSync();
     if (snap.exists) {
       try {
         var cloudData = JSON.parse(snap.data().data);
-        localStorage.setItem(SK, snap.data().data);
         callback(cloudData);
-      } catch(e) { callback(load()); }
-    } else { callback(load()); }
-  }).catch(function(){ hideSync(); callback(load()); });
+      } catch(e) { callback({cars:[],records:[],reminders:[],planned:[],stations:[]}); }
+    } else {
+      // New user - start fresh, ignore localStorage
+      callback({cars:[],records:[],reminders:[],planned:[],stations:[]});
+    }
+  }).catch(function(){ hideSync(); callback({cars:[],records:[],reminders:[],planned:[],stations:[]}); });
 }
 var D = load();
 var uid = function() { return Math.random().toString(36).slice(2,10); };
@@ -702,13 +704,16 @@ function buildCar() {
     wrap.appendChild(pc);
   }
 
-  // records - last month only
+  // records - current calendar month only
   var now2 = new Date();
-  var monthAgo = new Date(now2.getFullYear(), now2.getMonth()-1, now2.getDate());
-  var recentRecs = recs.filter(function(r){ return new Date(r.date) >= monthAgo; });
+  var recentRecs = recs.filter(function(r){
+    var d = new Date(r.date);
+    return d.getFullYear()===now2.getFullYear() && d.getMonth()===now2.getMonth();
+  });
+  var monthName = now2.toLocaleDateString('ru',{month:'long',year:'numeric'});
 
   var secRow = mk('div',{css:'display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:10px'});
-  secRow.appendChild(mk('div',{cls:'sec', css:'margin:0', txt:T['history']+' (\u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043c\u0435\u0441\u044f\u0446)'}));
+  secRow.appendChild(mk('div',{cls:'sec', css:'margin:0', txt:monthName}));
   if (recs.length > 0) {
     var histBtn = on(mk('button',{cls:'pbtn', css:'font-size:11px', txt:'\u0412\u0441\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u2192'}), 'click', function(){ view='history'; render(); });
     secRow.appendChild(histBtn);
@@ -718,7 +723,7 @@ function buildCar() {
   if (recentRecs.length === 0) {
     var empty = mk('div',{cls:'card', css:'text-align:center;padding:32px'});
     empty.appendChild(mk('div',{css:'font-size:32px;margin-bottom:8px', txt:'\ud83d\udccb'}));
-    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px', txt:recs.length>0?'\u0417\u0430 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043c\u0435\u0441\u044f\u0446 \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u043d\u0435\u0442':T['no-records-title']+'. '+T['no-records-desc']+'.' }));
+    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px', txt:recs.length>0?'\u0412 \u044d\u0442\u043e\u043c \u043c\u0435\u0441\u044f\u0446\u0435 \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u043d\u0435\u0442':T['no-records-title']+'. '+T['no-records-desc']+'.' }));
     wrap.appendChild(empty);
   } else {
     var rcard = mk('div',{cls:'card rcard'});
@@ -1155,17 +1160,41 @@ function buildRecForm(modal) {
       formData.stInp=stInp; formData.savedStations=savedStations;
 
       // Price + liters
-      var priceInp = mkInp('number',''); addField(dynForm,'\u0426\u0435\u043d\u0430 \u0437\u0430 \u043b\u0438\u0442\u0440 (\u20BD)',priceInp); formData.priceInp=priceInp;
-      var litersInp = mkInp('number',''); addField(dynForm,'\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e (\u043b)',litersInp); formData.litersInp=litersInp;
+      // Smart 3-field calculator: fill any 2, third auto-calculates
+      var priceInp = mkInp('number',''); priceInp.placeholder='0.00'; priceInp.step='0.01';
+      var litersInp = mkInp('number',''); litersInp.placeholder='0';
+      var totalInp = mkInp('number',''); totalInp.placeholder='0';
 
-      // Total display
-      var totalDisp = mk('div',{css:'font-size:13px;color:var(--m);margin-top:-8px;margin-bottom:12px',txt:''});
-      dynForm.appendChild(totalDisp);
-      function updateTotal(){
-        var p=parseFloat(priceInp.value)||0, l=parseFloat(litersInp.value)||0;
-        totalDisp.textContent = (p&&l) ? '\u0418\u0442\u043e\u0433\u043e: '+(p*l).toFixed(0)+' \u20BD' : '';
+      addField(dynForm,'\u0426\u0435\u043d\u0430 \u0437\u0430 \u043b\u0438\u0442\u0440 (\u20BD)',priceInp);
+      addField(dynForm,'\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e (\u043b)',litersInp);
+      addField(dynForm,'\u0418\u0442\u043e\u0433\u043e (\u20BD)',totalInp);
+
+      formData.priceInp=priceInp; formData.litersInp=litersInp; formData.totalInp=totalInp;
+
+      var lastChanged = null; // track which field was changed last
+
+      function calcFuel(changed) {
+        lastChanged = changed;
+        var p = parseFloat(priceInp.value);
+        var l = parseFloat(litersInp.value);
+        var t = parseFloat(totalInp.value);
+        if (changed==='price' && !isNaN(p) && !isNaN(l) && l>0) {
+          totalInp.value = (p*l).toFixed(0);
+        } else if (changed==='price' && !isNaN(p) && !isNaN(t) && t>0) {
+          litersInp.value = (t/p).toFixed(2);
+        } else if (changed==='liters' && !isNaN(l) && !isNaN(p) && p>0) {
+          totalInp.value = (p*l).toFixed(0);
+        } else if (changed==='liters' && !isNaN(l) && !isNaN(t) && t>0) {
+          priceInp.value = (t/l).toFixed(2);
+        } else if (changed==='total' && !isNaN(t) && !isNaN(p) && p>0) {
+          litersInp.value = (t/p).toFixed(2);
+        } else if (changed==='total' && !isNaN(t) && !isNaN(l) && l>0) {
+          priceInp.value = (t/l).toFixed(2);
+        }
       }
-      on(priceInp,'input',updateTotal); on(litersInp,'input',updateTotal);
+      on(priceInp,'input',function(){ calcFuel('price'); });
+      on(litersInp,'input',function(){ calcFuel('liters'); });
+      on(totalInp,'input',function(){ calcFuel('total'); });
 
       var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
 
@@ -1296,7 +1325,7 @@ function buildRecForm(modal) {
       rec.station = station;
       rec.pricePerLiter = formData.priceInp ? formData.priceInp.value : '';
       rec.liters = formData.litersInp ? formData.litersInp.value : '';
-      rec.cost = (rec.pricePerLiter&&rec.liters) ? (parseFloat(rec.pricePerLiter)*parseFloat(rec.liters)).toFixed(0) : '';
+      rec.cost = formData.totalInp && formData.totalInp.value ? formData.totalInp.value : (rec.pricePerLiter&&rec.liters?(parseFloat(rec.pricePerLiter)*parseFloat(rec.liters)).toFixed(0):'');
 
     } else if (cat==='insurance') {
       if (!formData.docName.value.trim()) { showToast(T['need-name']); return; }
