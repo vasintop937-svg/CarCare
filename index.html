@@ -118,6 +118,23 @@ select.inp option{background:var(--s2)}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:11px 18px;font-size:14px;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.4);white-space:nowrap;display:none}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--b);border-radius:4px}
+
+/* Auth */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{background:var(–s);border:1px solid var(–b);border-radius:24px;padding:32px 24px;width:100%;max-width:400px}
+.auth-logo{font-family:var(–fd);font-size:28px;font-weight:800;text-align:center;margin-bottom:8px}
+.auth-logo span{color:var(–a)}
+.auth-sub{text-align:center;color:var(–m);font-size:14px;margin-bottom:28px;line-height:1.5}
+.auth-tabs{display:flex;background:var(–s2);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px}
+.auth-tab{flex:1;padding:10px;border:none;border-radius:9px;font-family:var(–fd);font-size:14px;font-weight:600;cursor:pointer;background:transparent;color:var(–m);transition:all .2s}
+.auth-tab.on{background:var(–s);color:var(–t);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.auth-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#EF4444;border-radius:12px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none}
+.auth-forgot{text-align:right;margin-top:-8px;margin-bottom:14px}
+.auth-forgot button{background:none;border:none;color:var(–m);font-size:12px;cursor:pointer;font-family:var(–fb)}
+.auth-forgot button:hover{color:var(–a)}
+.user-bar{display:flex;align-items:center;gap:8px}
+.user-email{font-size:11px;color:var(–m);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signout-btn{padding:6px 12px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(–b);background:var(–s2);color:var(–m)}
 </style>
 
 <!-- All Russian text stored as data to avoid encoding issues -->
@@ -263,6 +280,8 @@ select.inp option{background:var(--s2)}
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script>
 // Firebase config
 firebase.initializeApp({
@@ -274,59 +293,48 @@ firebase.initializeApp({
   appId: "1:724496184070:web:a5a8b5097e6e15c5f26487"
 });
 var db = firebase.firestore();
+var auth = firebase.auth();
+var currentUser = null;
 
-// Device ID - unique per browser, stored in localStorage
 var SK = 'cardiary_v7';
-var DEVICE_KEY = 'cardiary_device_id';
-var deviceId = localStorage.getItem(DEVICE_KEY);
-if (!deviceId) { deviceId = 'dev_' + Math.random().toString(36).slice(2,18); localStorage.setItem(DEVICE_KEY, deviceId); }
-
-var docRef = db.collection('users').doc(deviceId);
 var syncInd = document.getElementById('sync-ind');
+function showSync() { if(syncInd) syncInd.style.display='block'; }
+function hideSync() { if(syncInd) syncInd.style.display='none'; }
 
-function showSync() { syncInd.style.display = 'block'; }
-function hideSync() { syncInd.style.display = 'none'; }
-
-// Load from Firebase, fallback to localStorage
-function load() {
-  try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[]}; }
-  catch(e) { return {cars:[],records:[],reminders:[],planned:[]}; }
+function getUserDoc() {
+  if (!currentUser) return null;
+  return db.collection('users').doc(currentUser.uid);
 }
 
-// Save to both localStorage and Firebase
+function load() {
+  try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : {cars:[],records:[],reminders:[],planned:[],stations:[]}; }
+  catch(e) { return {cars:[],records:[],reminders:[],planned:[],stations:[]}; }
+}
+
 function save(d) {
   try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {}
+  var doc = getUserDoc();
+  if (!doc) return;
   showSync();
-  docRef.set({data: JSON.stringify(d), updated: Date.now()})
-    .then(function() { hideSync(); })
-    .catch(function() { hideSync(); });
+  doc.set({data: JSON.stringify(d), updated: Date.now()})
+    .then(function(){ hideSync(); })
+    .catch(function(){ hideSync(); });
 }
 
-// On first load, try to get data from Firebase (newer than localStorage)
 function loadFromCloud(callback) {
+  var doc = getUserDoc();
+  if (!doc) { callback(load()); return; }
   showSync();
-  docRef.get().then(function(doc) {
+  doc.get().then(function(snap) {
     hideSync();
-    if (doc.exists) {
-      var cloudData = JSON.parse(doc.data().data);
-      var localRaw = localStorage.getItem(SK);
-      var cloudUpdated = doc.data().updated || 0;
-      var localUpdated = 0;
-      try { var lp = JSON.parse(localRaw); localUpdated = lp._updated || 0; } catch(e) {}
-      // Use whichever is newer
-      if (cloudUpdated > localUpdated) {
-        localStorage.setItem(SK, doc.data().data);
+    if (snap.exists) {
+      try {
+        var cloudData = JSON.parse(snap.data().data);
+        localStorage.setItem(SK, snap.data().data);
         callback(cloudData);
-      } else {
-        callback(load());
-      }
-    } else {
-      callback(load());
-    }
-  }).catch(function() {
-    hideSync();
-    callback(load());
-  });
+      } catch(e) { callback(load()); }
+    } else { callback(load()); }
+  }).catch(function(){ hideSync(); callback(load()); });
 }
 var D = load();
 var uid = function() { return Math.random().toString(36).slice(2,10); };
@@ -471,6 +479,107 @@ function mk(tag, attrs, children) {
 }
 function on(el, ev, fn) { el.addEventListener(ev, fn); return el; }
 
+function renderAuth(tab) {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  var wrap = mk('div',{cls:'auth-wrap'});
+  var card = mk('div',{cls:'auth-card'});
+
+  var logo = mk('div',{cls:'auth-logo'});
+  logo.appendChild(document.createTextNode('Car'));
+  logo.appendChild(mk('span',{txt:'Diary'}));
+  card.appendChild(logo);
+  card.appendChild(mk('div',{cls:'auth-sub', txt:'\u0414\u043d\u0435\u0432\u043d\u0438\u043a \u0432\u0430\u0448\u0435\u0433\u043e \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044f'}));
+
+  // Tabs
+  var tabs = mk('div',{cls:'auth-tabs'});
+  var tabLogin = mk('button',{cls:'auth-tab '+(tab==='login'?'on':''), txt:'\u0412\u043e\u0439\u0442\u0438'});
+  var tabReg   = mk('button',{cls:'auth-tab '+(tab==='register'?'on':''), txt:'\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f'});
+  tabs.appendChild(tabLogin); tabs.appendChild(tabReg);
+  card.appendChild(tabs);
+
+  var errBox = mk('div',{cls:'auth-err'});
+  card.appendChild(errBox);
+
+  function showErr(msg) { errBox.textContent=msg; errBox.style.display='block'; }
+  function hideErr() { errBox.style.display='none'; }
+
+  // Fields
+  var emailInp = mk('input',{cls:'inp', type:'email'});
+  emailInp.placeholder='email@example.com';
+  var passInp = mk('input',{cls:'inp', type:'password'});
+  passInp.placeholder='\u041f\u0430\u0440\u043e\u043b\u044c';
+  var pass2Inp = mk('input',{cls:'inp', type:'password'});
+  pass2Inp.placeholder='\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c';
+
+  var efWrap = mk('div',{cls:'field'}); efWrap.appendChild(mk('label',{txt:'Email'})); efWrap.appendChild(emailInp); card.appendChild(efWrap);
+  var pfWrap = mk('div',{cls:'field'}); pfWrap.appendChild(mk('label',{txt:'\u041f\u0430\u0440\u043e\u043b\u044c'})); pfWrap.appendChild(passInp); card.appendChild(pfWrap);
+
+  var p2fWrap = mk('div',{cls:'field',css:tab==='register'?'':'display:none'});
+  p2fWrap.appendChild(mk('label',{txt:'\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c'}));
+  p2fWrap.appendChild(pass2Inp);
+  card.appendChild(p2fWrap);
+
+  // Forgot password (login only)
+  var forgotWrap = mk('div',{cls:'auth-forgot', css:tab==='login'?'':'display:none'});
+  var forgotBtn = mk('button',{txt:'\u0417\u0430\u0431\u044b\u043b \u043f\u0430\u0440\u043e\u043b\u044c?'});
+  on(forgotBtn,'click',function(){
+    var email = emailInp.value.trim();
+    if (!email) { showErr('\u0412\u0432\u0435\u0434\u0438 email \u0434\u043b\u044f \u0441\u0431\u0440\u043e\u0441\u0430 \u043f\u0430\u0440\u043e\u043b\u044f'); return; }
+    auth.sendPasswordResetEmail(email).then(function(){
+      showToast('\u041f\u0438\u0441\u044c\u043c\u043e \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e \u043d\u0430 '+email);
+      hideErr();
+    }).catch(function(e){ showErr(authErrMsg(e.code)); });
+  });
+  forgotWrap.appendChild(forgotBtn);
+  card.appendChild(forgotWrap);
+
+  // Action button
+  var actionBtn = mk('button',{cls:'btnok', txt:tab==='login'?'\u0412\u043e\u0439\u0442\u0438':'\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442'});
+  on(actionBtn,'click',function(){
+    hideErr();
+    var email = emailInp.value.trim();
+    var pass = passInp.value;
+    if (!email || !pass) { showErr('\u0417\u0430\u043f\u043e\u043b\u043d\u0438 \u0432\u0441\u0435 \u043f\u043e\u043b\u044f'); return; }
+    if (tab==='register') {
+      if (pass !== pass2Inp.value) { showErr('\u041f\u0430\u0440\u043e\u043b\u0438 \u043d\u0435 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u044e\u0442'); return; }
+      if (pass.length < 6) { showErr('\u041f\u0430\u0440\u043e\u043b\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c 6 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432'); return; }
+      actionBtn.textContent='\u0421\u043e\u0437\u0434\u0430\u0451\u043c...'; actionBtn.disabled=true;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .catch(function(e){ actionBtn.textContent='\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442'; actionBtn.disabled=false; showErr(authErrMsg(e.code)); });
+    } else {
+      actionBtn.textContent='\u0412\u0445\u043e\u0434\u0438\u043c...'; actionBtn.disabled=true;
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(function(e){ actionBtn.textContent='\u0412\u043e\u0439\u0442\u0438'; actionBtn.disabled=false; showErr(authErrMsg(e.code)); });
+    }
+  });
+  card.appendChild(actionBtn);
+
+  // Tab switching
+  on(tabLogin,'click',function(){ renderAuth('login'); });
+  on(tabReg,'click',function(){ renderAuth('register'); });
+
+  // Enter key
+  on(passInp,'keydown',function(e){ if(e.key==='Enter') actionBtn.click(); });
+  on(pass2Inp,'keydown',function(e){ if(e.key==='Enter') actionBtn.click(); });
+
+  wrap.appendChild(card);
+  app.appendChild(wrap);
+}
+
+function authErrMsg(code) {
+  var msgs = {
+    'auth/user-not-found': '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d',
+    'auth/wrong-password': '\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c',
+    'auth/invalid-email': '\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 email',
+    'auth/email-already-in-use': '\u042d\u0442\u043e\u0442 email \u0443\u0436\u0435 \u0437\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d',
+    'auth/weak-password': '\u041f\u0430\u0440\u043e\u043b\u044c \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u043f\u0440\u043e\u0441\u0442\u043e\u0439',
+    'auth/too-many-requests': '\u0421\u043b\u0438\u0448\u043a\u043e\u043c \u043c\u043d\u043e\u0433\u043e \u043f\u043e\u043f\u044b\u0442\u043e\u043a. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439 \u043f\u043e\u0437\u0436\u0435',
+    'auth/invalid-credential': '\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 email \u0438\u043b\u0438 \u043f\u0430\u0440\u043e\u043b\u044c'
+  };
+  return msgs[code] || '\u041e\u0448\u0438\u0431\u043a\u0430: '+code;
+}
+
 function render() {
   var app = document.getElementById('app');
   app.innerHTML = '';
@@ -487,7 +596,14 @@ function buildHome() {
   logo.appendChild(document.createTextNode('Car'));
   logo.appendChild(mk('span',{txt:'Diary'}));
   hdr.appendChild(logo);
-  hdr.appendChild(mk('div',{css:'font-size:12px;color:var(--m)', txt:D.cars.length+T['cars-count']}));
+  var userBar = mk('div',{cls:'user-bar'});
+  if (currentUser) {
+    userBar.appendChild(mk('div',{cls:'user-email', txt:currentUser.email}));
+    var soBtn = mk('button',{cls:'signout-btn', txt:'\u0412\u044b\u0439\u0442\u0438'});
+    on(soBtn,'click',function(){ auth.signOut(); });
+    userBar.appendChild(soBtn);
+  }
+  hdr.appendChild(userBar);
   div.appendChild(hdr);
 
   if (D.cars.length === 0) {
@@ -636,7 +752,13 @@ function buildRecRow(rec) {
   row.appendChild(mk('div',{cls:'rdot', css:'background:'+cat.color}));
   var rb = mk('div',{cls:'rb'});
   rb.appendChild(mk('div',{cls:'rt', txt:rec.title}));
-  if (rec.fuelType) rb.appendChild(mk('div',{css:'font-size:12px;color:#F59E0B;margin-top:2px', txt:rec.liters?rec.liters+' \u043b \u00b7 '+rec.pricePerLiter+' \u20BD/\u043b':''}));
+  if (rec.fuelType) {
+    var fuelMeta = '';
+    if (rec.liters) fuelMeta += rec.liters+' \u043b';
+    if (rec.pricePerLiter) fuelMeta += ' \u00b7 '+rec.pricePerLiter+' \u20BD/\u043b';
+    if (rec.station) fuelMeta += ' \u00b7 '+rec.station;
+    if (fuelMeta) rb.appendChild(mk('div',{css:'font-size:12px;color:#F59E0B;margin-top:2px', txt:fuelMeta}));
+  }
   if (rec.part) rb.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:2px', txt:T['part-lbl']+' '+rec.part}));
   if (rec.expiry) rb.appendChild(mk('div',{css:'font-size:12px;color:#8B5CF6;margin-top:2px', txt:'\u0414\u043e: '+fmtDate(rec.expiry)}));
   var meta = mk('div',{cls:'rm'});
@@ -967,10 +1089,84 @@ function buildRecForm(modal) {
       var notes = mkInp('textarea',''); addField(dynForm,T['notes-inp'],notes); formData.notes=notes;
 
     } else if (cat==='fuel') {
-      var fuelTypes = ['\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-92','\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-95','\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-98','\u042d\u043a\u0442\u043e-100','\u0414\u0438\u0437\u0435\u043b\u044c','\u041c\u0435\u0442\u0430\u043d'];
-      var fuelSel = mkInp('select'); fuelTypes.forEach(function(f){var o=mk('option',{txt:f});o.value=f;fuelSel.appendChild(o);}); addField(dynForm,'\u0422\u043e\u043f\u043b\u0438\u0432\u043e',fuelSel); formData.fuelSel=fuelSel;
+      // Fuel type selector: Benzin / Dizel / Metan
+      var ftWrap = mk('div',{cls:'field'});
+      ftWrap.appendChild(mk('label',{txt:'\u0422\u0438\u043f \u0442\u043e\u043f\u043b\u0438\u0432\u0430'}));
+      var ftRow = mk('div',{css:'display:flex;gap:8px;margin-bottom:4px'});
+      var selFuelType = 'benzin'; var ftBtns = [];
+      var octaneWrap = mk('div',{cls:'field'});
+
+      function buildOctane(ft) {
+        octaneWrap.innerHTML='';
+        if (ft !== 'benzin') return;
+        octaneWrap.appendChild(mk('label',{txt:'\u041e\u043a\u0442\u0430\u043d\u043e\u0432\u043e\u0435 \u0447\u0438\u0441\u043b\u043e'}));
+        var oRow = mk('div',{css:'display:flex;gap:8px;flex-wrap:wrap'});
+        var selOct = '95'; var oBtns = [];
+        [['92','92'],['95','95'],['95+','95+'],['100','100']].forEach(function(o){
+          var b = mk('button',{cls:'pbtn '+(o[0]==='95'?'pbtnon':''), txt:o[1]});
+          on(b,'click',function(){ oBtns.forEach(function(x){x.className='pbtn';}); b.className='pbtn pbtnon'; selOct=o[0]; formData.octane=selOct; });
+          oBtns.push(b); oRow.appendChild(b);
+        });
+        formData.octane = '95';
+        octaneWrap.appendChild(oRow);
+      }
+
+      ['\u0411\u0435\u043d\u0437\u0438\u043d','\u0414\u0438\u0437\u0435\u043b\u044c','\u041c\u0435\u0442\u0430\u043d'].forEach(function(lbl,idx){
+        var id = ['benzin','dizel','metan'][idx];
+        var b = mk('button',{cls:'pbtn '+(id==='benzin'?'pbtnon':''), txt:lbl});
+        on(b,'click',function(){
+          ftBtns.forEach(function(x){x.className='pbtn';}); b.className='pbtn pbtnon';
+          selFuelType=id; formData.selFuelType=id; buildOctane(id);
+        });
+        ftBtns.push(b); ftRow.appendChild(b);
+      });
+      formData.selFuelType='benzin';
+      ftWrap.appendChild(ftRow); dynForm.appendChild(ftWrap);
+      dynForm.appendChild(octaneWrap);
+      buildOctane('benzin');
+
+      // Station with autocomplete from saved stations
+      var savedStations = D.stations || [];
+
+      var stField = mk('div',{cls:'field'});
+      stField.appendChild(mk('label',{txt:'\u0417\u0430\u043f\u0440\u0430\u0432\u043a\u0430'}));
+      var stWrap = mk('div',{css:'position:relative'});
+      var stInp = mkInp('text',''); stInp.autocomplete='off';
+      var dropdown = mk('div',{css:'display:none;position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--b);border-radius:12px;z-index:50;overflow:hidden;margin-top:4px'});
+
+      function updateDropdown() {
+        var val = stInp.value.trim().toLowerCase();
+        dropdown.innerHTML='';
+        var matches = savedStations.filter(function(s){ return s.toLowerCase().indexOf(val)===0 && s!==stInp.value; });
+        if (matches.length===0 || val==='') { dropdown.style.display='none'; return; }
+        matches.slice(0,5).forEach(function(s){
+          var item = mk('div',{css:'padding:11px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--b)',txt:s});
+          on(item,'click',function(){ stInp.value=s; dropdown.style.display='none'; });
+          on(item,'mouseenter',function(){ item.style.background='rgba(200,255,0,.07)'; });
+          on(item,'mouseleave',function(){ item.style.background=''; });
+          dropdown.appendChild(item);
+        });
+        dropdown.style.display='block';
+      }
+      on(stInp,'input',updateDropdown);
+      on(stInp,'blur',function(){ setTimeout(function(){ dropdown.style.display='none'; },200); });
+      stWrap.appendChild(stInp); stWrap.appendChild(dropdown);
+      stField.appendChild(stWrap); dynForm.appendChild(stField);
+      formData.stInp=stInp; formData.savedStations=savedStations;
+
+      // Price + liters
       var priceInp = mkInp('number',''); addField(dynForm,'\u0426\u0435\u043d\u0430 \u0437\u0430 \u043b\u0438\u0442\u0440 (\u20BD)',priceInp); formData.priceInp=priceInp;
       var litersInp = mkInp('number',''); addField(dynForm,'\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e (\u043b)',litersInp); formData.litersInp=litersInp;
+
+      // Total display
+      var totalDisp = mk('div',{css:'font-size:13px;color:var(--m);margin-top:-8px;margin-bottom:12px',txt:''});
+      dynForm.appendChild(totalDisp);
+      function updateTotal(){
+        var p=parseFloat(priceInp.value)||0, l=parseFloat(litersInp.value)||0;
+        totalDisp.textContent = (p&&l) ? '\u0418\u0442\u043e\u0433\u043e: '+(p*l).toFixed(0)+' \u20BD' : '';
+      }
+      on(priceInp,'input',updateTotal); on(litersInp,'input',updateTotal);
+
       var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
 
     } else if (cat==='insurance') {
@@ -1087,11 +1283,20 @@ function buildRecForm(modal) {
       rec.maintenanceItems = parts;
 
     } else if (cat==='fuel') {
-      rec.title = formData.fuelSel.value;
-      rec.fuelType = formData.fuelSel.value;
-      rec.pricePerLiter = formData.priceInp.value;
-      rec.liters = formData.litersInp.value;
-      rec.cost = formData.priceInp.value && formData.litersInp.value ? (parseFloat(formData.priceInp.value)*parseFloat(formData.litersInp.value)).toFixed(0) : '';
+      var fuelLabel = formData.selFuelType==='benzin'?('\u0411\u0435\u043d\u0437\u0438\u043d '+(formData.octane||'95')):formData.selFuelType==='dizel'?'\u0414\u0438\u0437\u0435\u043d\u044c':'\u041c\u0435\u0442\u0430\u043d';
+      var station = formData.stInp ? formData.stInp.value.trim() : '';
+      // Save station to memory
+      if (station && formData.savedStations && formData.savedStations.indexOf(station)===-1) {
+        formData.savedStations.push(station);
+        D.stations = formData.savedStations;
+      }
+      rec.title = fuelLabel + (station?' \u2014 '+station:'');
+      rec.fuelType = formData.selFuelType;
+      rec.octane = formData.octane||'';
+      rec.station = station;
+      rec.pricePerLiter = formData.priceInp ? formData.priceInp.value : '';
+      rec.liters = formData.litersInp ? formData.litersInp.value : '';
+      rec.cost = (rec.pricePerLiter&&rec.liters) ? (parseFloat(rec.pricePerLiter)*parseFloat(rec.liters)).toFixed(0) : '';
 
     } else if (cat==='insurance') {
       if (!formData.docName.value.trim()) { showToast(T['need-name']); return; }
@@ -1222,10 +1427,20 @@ function fetchWeather() {
   }, function(){ showToast(T['weather-err']); });
 }
 
-// Start: load from Firebase first, fallback to localStorage
-loadFromCloud(function(cloudData) {
-  D = cloudData;
-  render();
+// Auth state listener - entry point
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    currentUser = user;
+    loadFromCloud(function(cloudData) {
+      D = cloudData;
+      view = 'home';
+      render();
+    });
+  } else {
+    currentUser = null;
+    D = load();
+    renderAuth('login');
+  }
 });
 </script>
 
