@@ -477,6 +477,7 @@ function render() {
   if (view==='home') app.appendChild(buildHome());
   else if (view==='car') app.appendChild(buildCar());
   else if (view==='record') app.appendChild(buildRecord());
+  else if (view==='history') app.appendChild(buildHistory());
 }
 
 function buildHome() {
@@ -585,32 +586,27 @@ function buildCar() {
     wrap.appendChild(pc);
   }
 
-  // records
-  wrap.appendChild(mk('div',{cls:'sec', css:'margin-top:24px', txt:T['history']}));
-  if (recs.length === 0) {
+  // records - last month only
+  var now2 = new Date();
+  var monthAgo = new Date(now2.getFullYear(), now2.getMonth()-1, now2.getDate());
+  var recentRecs = recs.filter(function(r){ return new Date(r.date) >= monthAgo; });
+
+  var secRow = mk('div',{css:'display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:10px'});
+  secRow.appendChild(mk('div',{cls:'sec', css:'margin:0', txt:T['history']+' (\u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043c\u0435\u0441\u044f\u0446)'}));
+  if (recs.length > 0) {
+    var histBtn = on(mk('button',{cls:'pbtn', css:'font-size:11px', txt:'\u0412\u0441\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u2192'}), 'click', function(){ view='history'; render(); });
+    secRow.appendChild(histBtn);
+  }
+  wrap.appendChild(secRow);
+
+  if (recentRecs.length === 0) {
     var empty = mk('div',{cls:'card', css:'text-align:center;padding:32px'});
     empty.appendChild(mk('div',{css:'font-size:32px;margin-bottom:8px', txt:'\ud83d\udccb'}));
-    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px', txt:T['no-records-title']+'. '+T['no-records-desc']+'.' }));
+    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px', txt:recs.length>0?'\u0417\u0430 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043c\u0435\u0441\u044f\u0446 \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u043d\u0435\u0442':T['no-records-title']+'. '+T['no-records-desc']+'.' }));
     wrap.appendChild(empty);
   } else {
     var rcard = mk('div',{cls:'card rcard'});
-    recs.forEach(function(rec) {
-      var cat = catById(rec.category);
-      var row = mk('div',{cls:'ri'});
-      row.appendChild(mk('div',{cls:'rdot', css:'background:'+cat.color}));
-      var rb = mk('div',{cls:'rb'});
-      rb.appendChild(mk('div',{cls:'rt', txt:rec.title}));
-      if (rec.tireType) { var tl = rec.tireType==='summer'?T['tire-summer']:rec.tireType==='winter'?T['tire-winter']:T['tire-all']; rb.appendChild(mk('div',{css:'font-size:12px;color:#10B981;margin-top:2px', txt:tl})); }
-      if (rec.part) rb.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:2px', txt:T['part-lbl']+' '+rec.part}));
-      var meta = mk('div',{cls:'rm'});
-      meta.appendChild(mk('span',{txt:fmtDate(rec.date)}));
-      if (rec.mileage) meta.appendChild(mk('span',{txt:fmtNum(rec.mileage)+' \u043a\u043c'}));
-      meta.appendChild(mk('span',{cls:'pill', css:'background:'+cat.color+'22;color:'+cat.color, txt:cat.ru}));
-      rb.appendChild(meta); row.appendChild(rb);
-      if (rec.cost) row.appendChild(mk('div',{cls:'rc', txt:parseFloat(rec.cost).toLocaleString('ru')+' \u20BD'}));
-      (function(id){on(row,'click',function(){selRecId=id;view='record';render();});})(rec.id);
-      rcard.appendChild(row);
-    });
+    recentRecs.forEach(function(rec) { rcard.appendChild(buildRecRow(rec)); });
     var total = mk('div',{cls:'total'});
     total.appendChild(mk('div',{css:'font-size:13px;color:var(--m)', txt:T['total']}));
     total.appendChild(mk('div',{css:'font-family:var(--fd);font-size:20px;font-weight:800;color:var(--a)', txt:cSpent(car.id).toLocaleString('ru')+' \u20BD'}));
@@ -632,6 +628,67 @@ function buildCar() {
   fabrow.appendChild(on(mk('button',{cls:'fab', txt:'+ '+T['nav-record']}), 'click', function(){openModal('rec');}));
   div.appendChild(fabrow);
   return div;
+}
+
+function buildRecRow(rec) {
+  var cat = catById(rec.category);
+  var row = mk('div',{cls:'ri'});
+  row.appendChild(mk('div',{cls:'rdot', css:'background:'+cat.color}));
+  var rb = mk('div',{cls:'rb'});
+  rb.appendChild(mk('div',{cls:'rt', txt:rec.title}));
+  if (rec.fuelType) rb.appendChild(mk('div',{css:'font-size:12px;color:#F59E0B;margin-top:2px', txt:rec.liters?rec.liters+' \u043b \u00b7 '+rec.pricePerLiter+' \u20BD/\u043b':''}));
+  if (rec.part) rb.appendChild(mk('div',{css:'font-size:12px;color:var(--m);margin-top:2px', txt:T['part-lbl']+' '+rec.part}));
+  if (rec.expiry) rb.appendChild(mk('div',{css:'font-size:12px;color:#8B5CF6;margin-top:2px', txt:'\u0414\u043e: '+fmtDate(rec.expiry)}));
+  var meta = mk('div',{cls:'rm'});
+  meta.appendChild(mk('span',{txt:fmtDate(rec.date)}));
+  if (rec.mileage) meta.appendChild(mk('span',{txt:fmtNum(rec.mileage)+' \u043a\u043c'}));
+  meta.appendChild(mk('span',{cls:'pill', css:'background:'+cat.color+'22;color:'+cat.color, txt:cat.ru}));
+  rb.appendChild(meta); row.appendChild(rb);
+  if (rec.cost) row.appendChild(mk('div',{cls:'rc', txt:parseFloat(rec.cost).toLocaleString('ru')+' \u20BD'}));
+  (function(id){on(row,'click',function(){selRecId=id;view='record';render();});})(rec.id);
+  return row;
+}
+
+function buildHistory() {
+  var car = D.cars.filter(function(c){return c.id===selCarId;})[0];
+  if (!car) { view='car'; return buildCar(); }
+  var recs = cRecs(car.id);
+  var div = mk('div');
+  var hdr = mk('div',{cls:'hdr'});
+  hdr.appendChild(on(mk('button',{cls:'ibtn',txt:'\u25c4'}),'click',function(){view='car';render();}));
+  hdr.appendChild(mk('div',{css:'font-family:var(--fd);font-size:15px;font-weight:600',txt:'\u0412\u0441\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f'}));
+  hdr.appendChild(mk('div',{css:'width:42px'}));
+  div.appendChild(hdr);
+  var wrap = mk('div',{cls:'wrap'});
+
+  if (recs.length === 0) {
+    var empty = mk('div',{cls:'card', css:'text-align:center;padding:32px'});
+    empty.appendChild(mk('div',{css:'font-size:32px;margin-bottom:8px',txt:'\ud83d\udccb'}));
+    empty.appendChild(mk('div',{css:'color:var(--m);font-size:14px',txt:T['no-records-title']}));
+    wrap.appendChild(empty);
+  } else {
+    // Group by month
+    var groups = {};
+    var groupOrder = [];
+    recs.forEach(function(rec){
+      var d = new Date(rec.date);
+      var key = d.getFullYear()+'-'+d.getMonth();
+      var label = d.toLocaleDateString('ru',{month:'long',year:'numeric'});
+      if (!groups[key]) { groups[key]=[]; groupOrder.push({key:key,label:label}); }
+      groups[key].push(rec);
+    });
+    groupOrder.forEach(function(g){
+      wrap.appendChild(mk('div',{cls:'sec',txt:g.label}));
+      var rcard = mk('div',{cls:'card rcard'});
+      groups[g.key].forEach(function(rec){ rcard.appendChild(buildRecRow(rec)); });
+      wrap.appendChild(rcard);
+    });
+    var total = mk('div',{cls:'card',css:'margin-top:12px;display:flex;justify-content:space-between;align-items:center'});
+    total.appendChild(mk('div',{css:'font-size:13px;color:var(--m)',txt:'\u0412\u0441\u0435\u0433\u043e \u043f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e'}));
+    total.appendChild(mk('div',{css:'font-family:var(--fd);font-size:22px;font-weight:800;color:var(--a)',txt:cSpent(car.id).toLocaleString('ru')+' \u20BD'}));
+    wrap.appendChild(total);
+  }
+  div.appendChild(wrap); return div;
 }
 
 function buildTireWidget(car, lt) {
@@ -847,36 +904,237 @@ function buildCarForm(modal) {
 }
 
 function buildRecForm(modal) {
-  var car=D.cars.filter(function(c){return c.id===selCarId;})[0];
+  var car = D.cars.filter(function(c){return c.id===selCarId;})[0];
   mHdr(modal, T['new-record'], false, null);
-  var selCat='maintenance';
-  var catDiv=mk('div',{cls:'field'}); catDiv.appendChild(mk('label',{txt:T['category-lbl']}));
-  var cg=mk('div',{cls:'cats'});
-  var tireRow=mk('div',{cls:'field',css:'display:none'});
+
+  // Category selector
+  var selCat = 'maintenance';
+  var catDiv = mk('div',{cls:'field'});
+  catDiv.appendChild(mk('label',{txt:T['category-lbl']}));
+  var cg = mk('div',{cls:'cats'});
+
+  // Dynamic form container
+  var dynForm = mk('div');
+
+  // Common fields: date + mileage
+  function commonFields() {
+    var row = mk('div',{cls:'row2'});
+    var date = mkInp('date','',new Date().toISOString().slice(0,10));
+    var df = mk('div',{cls:'field'}); df.appendChild(mk('label',{txt:T['date-inp']})); df.appendChild(date); row.appendChild(df);
+    var mili = mkInp('number','',car?car.mileage:'');
+    var mf = mk('div',{cls:'field'}); mf.appendChild(mk('label',{txt:T['mil-inp']})); mf.appendChild(mili); row.appendChild(mf);
+    return {row:row, date:date, mili:mili};
+  }
+
+  // Checkbox + cost row helper
+  function chkRow(label) {
+    var wrap = mk('div',{css:'display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b)'});
+    var left = mk('div',{css:'display:flex;align-items:center;gap:10px'});
+    var chk = mk('input'); chk.type='checkbox';
+    chk.style.cssText='width:18px;height:18px;cursor:pointer;accent-color:var(--a)';
+    var lbl = mk('span',{css:'font-size:14px',txt:label});
+    left.appendChild(chk); left.appendChild(lbl);
+    var costInp = mkInp('number','');
+    costInp.style.cssText='width:110px;padding:7px 10px;font-size:13px;display:none';
+    costInp.placeholder='\u20BD';
+    wrap.appendChild(left); wrap.appendChild(costInp);
+    chk.addEventListener('change',function(){ costInp.style.display=chk.checked?'block':'none'; });
+    return {wrap:wrap, chk:chk, cost:costInp};
+  }
+
+  // Build form by category
+  var formData = {};
+  function buildDyn(cat) {
+    dynForm.innerHTML='';
+    formData = {cat:cat};
+
+    if (cat==='maintenance') {
+      // Checkboxes
+      var items = [
+        ['\u041c\u0430\u0441\u043b\u043e','oil'],
+        ['\u041c\u0430\u0441\u043b\u044f\u043d\u044b\u0439 \u0444\u0438\u043b\u044c\u0442\u0440','oil_filter'],
+        ['\u0412\u043e\u0437\u0434\u0443\u0448\u043d\u044b\u0439 \u0444\u0438\u043b\u044c\u0442\u0440','air_filter'],
+        ['\u0421\u0430\u043b\u043e\u043d\u043d\u044b\u0439 \u0444\u0438\u043b\u044c\u0442\u0440','cabin_filter'],
+        ['\u0420\u0430\u0441\u0445\u043e\u0434\u043d\u0438\u043a\u0438','consumables']
+      ];
+      var chkBox = mk('div',{cls:'card',css:'padding:12px 16px;margin-bottom:12px'});
+      formData.chks = [];
+      items.forEach(function(it) {
+        var r = chkRow(it[0]); r.key=it[1]; formData.chks.push(r); chkBox.appendChild(r.wrap);
+      });
+      dynForm.appendChild(chkBox);
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+      var notes = mkInp('textarea',''); addField(dynForm,T['notes-inp'],notes); formData.notes=notes;
+
+    } else if (cat==='fuel') {
+      var fuelTypes = ['\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-92','\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-95','\u0411\u0435\u043d\u0437\u0438\u043d \u0410\u0418-98','\u042d\u043a\u0442\u043e-100','\u0414\u0438\u0437\u0435\u043b\u044c','\u041c\u0435\u0442\u0430\u043d'];
+      var fuelSel = mkInp('select'); fuelTypes.forEach(function(f){var o=mk('option',{txt:f});o.value=f;fuelSel.appendChild(o);}); addField(dynForm,'\u0422\u043e\u043f\u043b\u0438\u0432\u043e',fuelSel); formData.fuelSel=fuelSel;
+      var priceInp = mkInp('number',''); addField(dynForm,'\u0426\u0435\u043d\u0430 \u0437\u0430 \u043b\u0438\u0442\u0440 (\u20BD)',priceInp); formData.priceInp=priceInp;
+      var litersInp = mkInp('number',''); addField(dynForm,'\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e (\u043b)',litersInp); formData.litersInp=litersInp;
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+
+    } else if (cat==='insurance') {
+      var permWrap = mk('div',{css:'display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px;background:var(--s2);border-radius:12px'});
+      var permChk = mk('input'); permChk.type='checkbox';
+      permChk.style.cssText='width:18px;height:18px;cursor:pointer;accent-color:var(--a)';
+      permWrap.appendChild(permChk);
+      permWrap.appendChild(mk('span',{css:'font-size:14px',txt:'\u041f\u043e\u0441\u0442\u043e\u044f\u043d\u043d\u044b\u0439 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442'}));
+      dynForm.appendChild(permWrap);
+      var docName = mkInp('text',''); addField(dynForm,'\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430',docName); formData.docName=docName;
+      var expiryField = mk('div',{cls:'field'});
+      expiryField.appendChild(mk('label',{txt:'\u0414\u0430\u0442\u0430 \u043e\u043a\u043e\u043d\u0447\u0430\u043d\u0438\u044f'}));
+      var expiryInp = mkInp('date',''); expiryField.appendChild(expiryInp); dynForm.appendChild(expiryField);
+      formData.expiryInp=expiryInp; formData.permChk=permChk;
+      permChk.addEventListener('change',function(){ expiryField.style.display=permChk.checked?'none':'block'; });
+      var costInp = mkInp('number',''); addField(dynForm,'\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c (\u20BD)',costInp); formData.costInp=costInp;
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+
+    } else if (cat==='tires') {
+      // Operation type
+      var opWrap = mk('div',{cls:'field'});
+      opWrap.appendChild(mk('label',{txt:'\u041e\u043f\u0435\u0440\u0430\u0446\u0438\u044f'}));
+      var opRow = mk('div',{css:'display:flex;gap:8px;margin-bottom:4px'});
+      var selOp = 'change'; var opBtns = [];
+      [['\u0417\u0430\u043c\u0435\u043d\u0430','change'],['\u0420\u0435\u043c\u043e\u043d\u0442','repair']].forEach(function(o){
+        var b = mk('button',{cls:'pbtn '+(o[1]==='change'?'pbtnon':''), txt:o[0]});
+        on(b,'click',function(){ opBtns.forEach(function(x){x.className='pbtn';}); b.className='pbtn pbtnon'; selOp=o[1]; formData.selOp=selOp; });
+        opBtns.push(b); opRow.appendChild(b);
+      });
+      formData.selOp='change'; opWrap.appendChild(opRow); dynForm.appendChild(opWrap);
+
+      // What
+      var whatWrap = mk('div',{cls:'field'});
+      whatWrap.appendChild(mk('label',{txt:'\u0427\u0442\u043e'}));
+      var whatRow = mk('div',{css:'display:flex;gap:8px;margin-bottom:4px'});
+      var selWhat = 'tire'; var whatBtns = [];
+      [['\u0428\u0438\u043d\u0430','tire'],['\u0414\u0438\u0441\u043a','disk']].forEach(function(o){
+        var b = mk('button',{cls:'pbtn '+(o[1]==='tire'?'pbtnon':''), txt:o[0]});
+        on(b,'click',function(){ whatBtns.forEach(function(x){x.className='pbtn';}); b.className='pbtn pbtnon'; selWhat=o[1]; formData.selWhat=selWhat; });
+        whatBtns.push(b); whatRow.appendChild(b);
+      });
+      formData.selWhat='tire'; whatWrap.appendChild(whatRow); dynForm.appendChild(whatWrap);
+
+      // Wheel selector (multi)
+      var wheelWrap = mk('div',{cls:'field'});
+      wheelWrap.appendChild(mk('label',{txt:'\u041a\u043e\u043b\u0435\u0441\u043e (\u043c\u043e\u0436\u043d\u043e \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u043e)'}));
+      var wheelGrid = mk('div',{css:'display:grid;grid-template-columns:1fr 1fr;gap:8px'});
+      var wheels = [
+        ['\u041f\u0435\u0440\u0435\u0434\u043d\u0435\u0435 \u043f\u0440\u0430\u0432\u043e\u0435','fr'],
+        ['\u041f\u0435\u0440\u0435\u0434\u043d\u0435\u0435 \u043b\u0435\u0432\u043e\u0435','fl'],
+        ['\u0417\u0430\u0434\u043d\u0435\u0435 \u043f\u0440\u0430\u0432\u043e\u0435','rr'],
+        ['\u0417\u0430\u0434\u043d\u0435\u0435 \u043b\u0435\u0432\u043e\u0435','rl']
+      ];
+      var wheelChks = [];
+      wheels.forEach(function(w){
+        var wb = mk('div',{css:'display:flex;align-items:center;gap:8px;padding:10px;background:var(--s2);border-radius:10px;border:1px solid var(--b);cursor:pointer'});
+        var wc = mk('input'); wc.type='checkbox'; wc.style.cssText='width:16px;height:16px;accent-color:var(--a)';
+        wb.appendChild(wc); wb.appendChild(mk('span',{css:'font-size:13px',txt:w[0]}));
+        on(wb,'click',function(e){ if(e.target!==wc)wc.checked=!wc.checked; wb.style.borderColor=wc.checked?'var(--a)':'var(--b)'; });
+        wheelChks.push({chk:wc,key:w[1]}); wheelGrid.appendChild(wb);
+      });
+      formData.wheelChks=wheelChks; wheelWrap.appendChild(wheelGrid); dynForm.appendChild(wheelWrap);
+      var costInp = mkInp('number',''); addField(dynForm,'\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0443\u0441\u043b\u0443\u0433\u0438 (\u20BD)',costInp); formData.costInp=costInp;
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+
+    } else if (cat==='repair') {
+      var title = mkInp('text',''); addField(dynForm,'\u0427\u0442\u043e \u0441\u0434\u0435\u043b\u0430\u043d\u043e *',title); formData.title=title;
+      var part = mkInp('text',''); addField(dynForm,'\u0414\u0435\u0442\u0430\u043b\u044c / \u0437\u0430\u043f\u0447\u0430\u0441\u0442\u044c',part); formData.part=part;
+      var costInp = mkInp('number',''); addField(dynForm,'\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c (\u20BD)',costInp); formData.costInp=costInp;
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+      var notes = mkInp('textarea',''); addField(dynForm,T['notes-inp'],notes); formData.notes=notes;
+
+    } else { // other
+      var svc = mkInp('text',''); addField(dynForm,'\u0423\u0441\u043b\u0443\u0433\u0430',svc); formData.svc=svc;
+      var part = mkInp('text',''); addField(dynForm,'\u0414\u0435\u0442\u0430\u043b\u044c',part); formData.part=part;
+      var costInp = mkInp('number',''); addField(dynForm,'\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c (\u20BD)',costInp); formData.costInp=costInp;
+      var cf = commonFields(); dynForm.appendChild(cf.row); formData.date=cf.date; formData.mili=cf.mili;
+    }
+
+    // Save button
+    var btn = mk('button',{cls:'btnok',txt:T['save-record']});
+    on(btn,'click',function(){ saveRecord(cat); });
+    dynForm.appendChild(btn);
+  }
+
   CATS.forEach(function(c) {
-    var b=mk('div',{cls:'cat '+(c.id==='maintenance'?'caton':'')}); b.appendChild(mk('div',{cls:'cdot',css:'background:'+c.color})); b.appendChild(document.createTextNode(c.ru));
-    on(b,'click',function(){ document.querySelectorAll('.cat').forEach(function(x){x.className='cat';}); b.className='cat caton'; selCat=c.id; tireRow.style.display=c.id==='tires'?'block':'none'; });
+    var b = mk('div',{cls:'cat '+(c.id==='maintenance'?'caton':'')});
+    b.appendChild(mk('div',{cls:'cdot',css:'background:'+c.color}));
+    b.appendChild(document.createTextNode(c.ru));
+    on(b,'click',function(){
+      document.querySelectorAll('.cat').forEach(function(x){x.className='cat';});
+      b.className='cat caton'; selCat=c.id; buildDyn(c.id);
+    });
     cg.appendChild(b);
   });
   catDiv.appendChild(cg); modal.appendChild(catDiv);
-  tireRow.appendChild(mk('label',{txt:T['tire-type']}));
-  var tireSel=mk('select',{cls:'inp'});
-  [['',' - '+T['tire-type']+' - '],['summer',T['tire-summer']],['winter',T['tire-winter']],['all-season',T['tire-all']]].forEach(function(o){var opt=mk('option',{txt:o[1]});opt.value=o[0];tireSel.appendChild(opt);});
-  tireRow.appendChild(tireSel); modal.appendChild(tireRow);
-  var title=mkInp('text',''); addField(modal,T['what-done']+' *',title);
-  var part=mkInp('text',''); addField(modal,T['detail'],part);
-  var row=mk('div',{cls:'row2'});
-  var date=mkInp('date','',new Date().toISOString().slice(0,10)); var df=mk('div',{cls:'field'}); df.appendChild(mk('label',{txt:T['date-inp']})); df.appendChild(date); row.appendChild(df);
-  var mili=mkInp('number','85000',car?car.mileage:''); var mf=mk('div',{cls:'field'}); mf.appendChild(mk('label',{txt:T['mil-inp']})); mf.appendChild(mili); row.appendChild(mf);
-  modal.appendChild(row);
-  var cost=mkInp('number',''); addField(modal,T['cost-inp'],cost);
-  var notes=mkInp('textarea',''); addField(modal,T['notes-inp'],notes);
-  on(addField(modal,'',mk('button',{cls:'btnok',txt:T['save-record']})),'click',function(){
-    if (!title.value.trim()) { showToast(T['need-name']); return; }
-    D.records.push({id:uid(),carId:selCarId,title:title.value.trim(),category:selCat,tireType:tireSel.value,part:part.value.trim(),date:date.value,mileage:mili.value,cost:cost.value,notes:notes.value.trim(),createdAt:new Date().toISOString()});
+  modal.appendChild(dynForm);
+  buildDyn('maintenance');
+
+  function saveRecord(cat) {
+    var rec = {id:uid(), carId:selCarId, category:cat, createdAt:new Date().toISOString()};
+    rec.date = (formData.date&&formData.date.value) ? formData.date.value : new Date().toISOString().slice(0,10);
+    rec.mileage = formData.mili ? formData.mili.value : '';
+
+    if (cat==='maintenance') {
+      var parts=[], totalCost=0;
+      (formData.chks||[]).forEach(function(r){
+        if(r.chk.checked){ parts.push(r.key); totalCost+=parseFloat(r.cost.value)||0; }
+      });
+      if (parts.length===0) { showToast('\u0412\u044b\u0431\u0435\u0440\u0438 \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u0438\u043d \u044d\u043b\u0435\u043c\u0435\u043d\u0442'); return; }
+      rec.title = parts.join(', ');
+      rec.cost = totalCost||'';
+      rec.notes = formData.notes ? formData.notes.value : '';
+      rec.maintenanceItems = parts;
+
+    } else if (cat==='fuel') {
+      rec.title = formData.fuelSel.value;
+      rec.fuelType = formData.fuelSel.value;
+      rec.pricePerLiter = formData.priceInp.value;
+      rec.liters = formData.litersInp.value;
+      rec.cost = formData.priceInp.value && formData.litersInp.value ? (parseFloat(formData.priceInp.value)*parseFloat(formData.litersInp.value)).toFixed(0) : '';
+
+    } else if (cat==='insurance') {
+      if (!formData.docName.value.trim()) { showToast(T['need-name']); return; }
+      rec.title = formData.docName.value.trim();
+      rec.isPermanent = formData.permChk.checked;
+      rec.expiry = formData.permChk.checked ? '' : formData.expiryInp.value;
+      rec.cost = formData.costInp.value;
+      // Add reminder if has expiry
+      if (!formData.permChk.checked && formData.expiryInp.value) {
+        if (!D.reminders) D.reminders=[];
+        D.reminders.push({id:uid(),carId:selCarId,title:rec.title,icon:'\ud83d\udcdc',intervalType:'date',lastDate:rec.date,intervalMonths:Math.max(1,Math.round((new Date(formData.expiryInp.value)-new Date(rec.date))/2592000000)-1),expiryDate:formData.expiryInp.value,createdAt:new Date().toISOString()});
+      }
+
+    } else if (cat==='tires') {
+      var selWheels = (formData.wheelChks||[]).filter(function(w){return w.chk.checked;}).map(function(w){return w.key;});
+      var whatLabel = formData.selWhat==='tire'?'\u0448\u0438\u043d\u0430':'\u0434\u0438\u0441\u043a';
+      var opLabel = formData.selOp==='change'?'\u0417\u0430\u043c\u0435\u043d\u0430':'\u0420\u0435\u043c\u043e\u043d\u0442';
+      var wheelMap = {fr:'\u041f\u041f',fl:'\u041f\u041b',rr:'\u0417\u041f',rl:'\u0417\u041b'};
+      rec.title = opLabel+' '+whatLabel+(selWheels.length>0?' ('+selWheels.map(function(w){return wheelMap[w];}).join(', ')+')':'');
+      rec.tireOp = formData.selOp;
+      rec.tireWhat = formData.selWhat;
+      rec.wheels = selWheels;
+      rec.cost = formData.costInp.value;
+
+    } else if (cat==='repair') {
+      if (!formData.title||!formData.title.value.trim()) { showToast(T['need-name']); return; }
+      rec.title = formData.title.value.trim();
+      rec.part = formData.part ? formData.part.value.trim() : '';
+      rec.cost = formData.costInp ? formData.costInp.value : '';
+      rec.notes = formData.notes ? formData.notes.value : '';
+
+    } else { // other
+      if (!formData.svc||!formData.svc.value.trim()) { showToast(T['need-name']); return; }
+      rec.title = formData.svc.value.trim();
+      rec.part = formData.part ? formData.part.value.trim() : '';
+      rec.cost = formData.costInp ? formData.costInp.value : '';
+    }
+
+    D.records.push(rec);
     save(D); closeModal(); showToast(T['added-rec']); render();
-  });
+  }
 }
+
 
 function buildRemForm(modal, step, tmpl) {
   modal.innerHTML='';
