@@ -237,6 +237,7 @@ function leaveCar(carId, callback) {
 }
 
 let D = load();
+alert('4-данные загружены');
 const uid = function() { return Math.random().toString(36).slice(2,10); };
 let view = 'home', selCarId = null, selRecId = null, toastTimer = null;
 let weatherData = null, forecastData = null;
@@ -252,7 +253,7 @@ const T = {};
       T[name.slice(5)] = attrs[i].value;
     }
   }
-})();
+})();alert('5-тексты загружены');
 
 const DAYS = [T['days-su'], T['days-mo'], T['days-tu'], T['days-we'], T['days-th'], T['days-fr'], T['days-sa']];
 
@@ -339,7 +340,7 @@ function mk(tag, attrs, children) {
   return e;
 }
 function on(el, ev, fn) { el.addEventListener(ev, fn); return el; }
-
+alert('6-перед render');
 function render() {
   const app = document.getElementById('app');
   app.innerHTML = '';
