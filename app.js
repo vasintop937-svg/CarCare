@@ -9,7 +9,7 @@ window.onerror = function(msg, src, line, col, err) {
   }
   return false;
 };
-
+alert('1-перед firebase');
 firebase.initializeApp({
   apiKey: "AIzaSyAPAtCBZVbGJgyFZ682zYMpHif7CKzdtKs",
   authDomain: "car-diary-d3e7f.firebaseapp.com",
@@ -17,9 +17,9 @@ firebase.initializeApp({
   storageBucket: "car-diary-d3e7f.firebasestorage.app",
   messagingSenderId: "724496184070",
   appId: "1:724496184070:web:a5a8b5097e6e15c5f26487"
-});
+});alert('2-после firebase');
 
-const db = firebase.firestore();
+const db = firebase.firestore();alert('3-firestore ок');
 const auth = firebase.auth();
 let currentUser = null;
 
