@@ -1,4 +1,4 @@
-alert('app.js загружен');
+
 // CarDiary — app.js (оптимизированная версия)
 // Firebase config
 window.onerror = function(msg, src, line, col, err) {
