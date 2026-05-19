@@ -1,0 +1,20 @@
+{
+  "name": "CarDiary — Дневник авто",
+  "short_name": "CarDiary",
+  "description": "Дневник обслуживания автомобиля",
+  "start_url": "/CarCare/",
+  "scope": "/CarCare/",
+  "display": "standalone",
+  "background_color": "#0D0F14",
+  "theme_color": "#0D0F14",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
