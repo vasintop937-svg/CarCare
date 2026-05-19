@@ -1789,7 +1789,7 @@ function openJoinModal() {
 }
 
 // ========== АВТОРИЗАЦИЯ ==========
-function renderAuth(tab) {
+function renderAuth(tab) {alert('внутри renderAuth');
   const app = document.getElementById('app');
   app.innerHTML = '';
   const wrap = mk('div',{cls:'auth-wrap'});
