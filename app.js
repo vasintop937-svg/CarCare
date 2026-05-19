@@ -1888,9 +1888,9 @@ function showError(msg) {
   const app = document.getElementById('app');
   if (app) app.innerHTML = '<div style="padding:24px;color:#EF4444;font-family:monospace;font-size:13px;word-break:break-all;background:#0D0F14;min-height:100vh"><b>Error:</b><br>' + msg + '</div>';
 }
-
+alert('начинаем авторизацию');
 auth.onAuthStateChanged(function(user) {
-  try {
+  try {alert('вошли в auth: ' + (user ? 'пользователь есть' : 'пользователя нет'));
     if (user) {
       currentUser = user;
       loadFromCloud(function(cloudData) {
