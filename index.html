@@ -175,7 +175,72 @@ select.inp option{background:#1E2230}
 .photo-del-btn{padding:10px 20px;border-radius:12px;background:rgba(239,68,68,.15);color:#EF4444;border:1px solid rgba(239,68,68,.3);font-size:14px;cursor:pointer;font-family:DM Sans,sans-serif}
 .photo-close-btn{padding:10px 20px;border-radius:12px;background:#1E2230;color:#F0F2F8;border:1px solid rgba(255,255,255,.07);font-size:14px;cursor:pointer;font-family:DM Sans,sans-serif}
 .photo-loading{text-align:center;padding:20px;color:#7A8099;font-size:13px}
+/* === УЛУЧШЕНИЯ ДОСТУПНОСТИ И UX === */
 
+/* Повышаем контрастность серого текста (было #7A8099, стало #949AB5) */
+* {
+  --gray-accessible: #949AB5;
+}
+
+body, .rm, .remmeta, .planmeta, .hsub, .statk, .user-email,
+.auth-sub, .empty p, .fdnm, .fdmn, .month-name, .month-val,
+.dash-sub, .bar-val, .kpi-lbl {
+  color: var(--gray-accessible);
+}
+
+.sec, .pbtn, .auth-forgot button, .photo-loading {
+  color: var(--gray-accessible);
+}
+
+/* Focus visible для клавиатурной навигации */
+button:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid #C8FF00 !important;
+  outline-offset: 2px !important;
+}
+
+/* Убираем стандартный outline для мыши */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Плавные переходы для интерактивных элементов */
+.fab, .btnok, .cat, .ibtn, .pbtn, .pribtn, .cardh,
+.fabg, .fabp, .emj, .tmpl, .donebtn, .sbtn,
+.copybtn, .qlink, .photo-add, .cat {
+  transition: all 0.15s ease;
+}
+
+/* Предотвращаем pull-to-refresh в PWA на iOS */
+body {
+  overscroll-behavior: none;
+}
+
+/* Улучшаем скролл в модалках */
+.modal {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Анимация появления toast */
+.toast {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translate(-50%, 10px);
+  opacity: 0;
+}
+.toast[style*="display: block"] {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+  
 </style>
 </head>
 <body>
