@@ -1914,7 +1914,7 @@ auth.onAuthStateChanged(function(user) {
     } else {
       currentUser = null;
       D = load();
-      renderAuth('login');
+      renderAuth('login');alert('форма входа отрисована');
     }
   } catch(e) { showError('auth: '+e.message); }
 });
