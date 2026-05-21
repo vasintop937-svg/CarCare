@@ -2085,10 +2085,28 @@ ${historyText||'Записей нет'}
   "summary": "краткий итог 1-2 предложения"
 }`;
 
-  fetch('https://carcare.vasintop937.workers.dev/yandexgpt', {
+  const yagptKey = localStorage.getItem('yagpt_key');
+  if (!yagptKey) {
+    const kw = mk('div',{css:'background:#1E2230;border-radius:14px;padding:20px;text-align:center'});
+    kw.appendChild(mk('div',{css:'font-size:14px;color:#F0F2F8;margin-bottom:8px;font-family:Syne,sans-serif;font-weight:700',txt:'Без ключа не работает'}));
+    kw.appendChild(mk('div',{css:'font-size:12px;color:#949AB5;margin-bottom:16px',txt:'Введи API ключ Yandex Cloud. Сохранится на этом устройстве.'}));
+    const ki = mk('input',{cls:'inp',type:'text',placeholder:'AQVN...',css:'margin-bottom:10px'});
+    const sb = on(mk('button',{cls:'btnok',txt:'Сохранить и анализировать'}), 'click', function(){
+      const k = ki.value.trim();
+      if (!k) { showToast('Введи ключ'); return; }
+      localStorage.setItem('yagpt_key', k);
+      showToast('Ключ сохранён ✓');
+      box.innerHTML = '';
+      runTripAnalysis(car, recs, reminders, from, to, dist, box, done);
+    });
+    kw.appendChild(ki); kw.appendChild(sb); box.appendChild(kw); done(); return;
+  }
+
+  fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': 'Api-Key ' + yagptKey
     },
     body: JSON.stringify({
       modelUri: 'gpt://'+YAGPT_FOLDER+'/yandexgpt/latest',
