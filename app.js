@@ -2102,11 +2102,10 @@ ${historyText||'Записей нет'}
     kw.appendChild(ki); kw.appendChild(sb); box.appendChild(kw); done(); return;
   }
 
-  fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+  fetch('https://functions.yandexcloud.net/d4ejf8s5octdh91t82cj', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Api-Key ' + yagptKey
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       modelUri: 'gpt://'+YAGPT_FOLDER+'/yandexgpt/latest',
